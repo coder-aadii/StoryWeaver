@@ -1,0 +1,145 @@
+{
+  "$defs": {
+    "CameraSpec": {
+      "properties": {
+        "shot": {
+          "default": "medium",
+          "enum": [
+            "wide",
+            "medium",
+            "close_up",
+            "extreme_close_up",
+            "over_shoulder",
+            "aerial"
+          ],
+          "title": "Shot",
+          "type": "string"
+        },
+        "movement": {
+          "default": "static",
+          "enum": [
+            "static",
+            "slow_zoom_in",
+            "slow_zoom_out",
+            "pan_left",
+            "pan_right",
+            "tilt_up",
+            "tilt_down"
+          ],
+          "title": "Movement",
+          "type": "string"
+        }
+      },
+      "title": "CameraSpec",
+      "type": "object"
+    },
+    "TimelineScene": {
+      "description": "A scene with resolved timing and resolved asset URLs \u2014 the Remotion input.",
+      "properties": {
+        "scene_id": {
+          "title": "Scene Id",
+          "type": "string"
+        },
+        "start": {
+          "minimum": 0,
+          "title": "Start",
+          "type": "number"
+        },
+        "duration": {
+          "exclusiveMinimum": 0,
+          "title": "Duration",
+          "type": "number"
+        },
+        "narration": {
+          "default": "",
+          "title": "Narration",
+          "type": "string"
+        },
+        "subtitle": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Subtitle"
+        },
+        "image_src": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Image Src"
+        },
+        "audio_src": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Audio Src"
+        },
+        "camera": {
+          "$ref": "#/$defs/CameraSpec",
+          "default": {
+            "shot": "medium",
+            "movement": "static"
+          }
+        }
+      },
+      "required": [
+        "scene_id",
+        "start",
+        "duration"
+      ],
+      "title": "TimelineScene",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "version": {
+      "default": 1,
+      "title": "Version",
+      "type": "integer"
+    },
+    "fps": {
+      "default": 30,
+      "title": "Fps",
+      "type": "integer"
+    },
+    "width": {
+      "default": 1920,
+      "title": "Width",
+      "type": "integer"
+    },
+    "height": {
+      "default": 1080,
+      "title": "Height",
+      "type": "integer"
+    },
+    "scenes": {
+      "items": {
+        "$ref": "#/$defs/TimelineScene"
+      },
+      "title": "Scenes",
+      "type": "array"
+    }
+  },
+  "required": [
+    "scenes"
+  ],
+  "title": "Timeline",
+  "type": "object"
+}

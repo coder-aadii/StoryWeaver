@@ -1,0 +1,7 @@
+{
+  "name": "storyweaver",
+  "private": true,
+  "description": "StoryWeaver — from source to story to video.",
+  "packageManager": "pnpm@11.6.0",
+  "engines": { "node": ">=20" }
+}

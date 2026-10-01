@@ -1,0 +1,167 @@
+{
+  "$defs": {
+    "TranscriptSegment": {
+      "properties": {
+        "start": {
+          "minimum": 0,
+          "title": "Start",
+          "type": "number"
+        },
+        "end": {
+          "minimum": 0,
+          "title": "End",
+          "type": "number"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "speaker": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Speaker"
+        }
+      },
+      "required": [
+        "start",
+        "end",
+        "text"
+      ],
+      "title": "TranscriptSegment",
+      "type": "object"
+    }
+  },
+  "description": "Platform-neutral result of any SourceExtractor. YouTube specifics stop at this boundary.",
+  "properties": {
+    "platform": {
+      "title": "Platform",
+      "type": "string"
+    },
+    "kind": {
+      "enum": [
+        "video",
+        "channel",
+        "playlist",
+        "transcript",
+        "file"
+      ],
+      "title": "Kind",
+      "type": "string"
+    },
+    "external_id": {
+      "title": "External Id",
+      "type": "string"
+    },
+    "url": {
+      "title": "Url",
+      "type": "string"
+    },
+    "title": {
+      "title": "Title",
+      "type": "string"
+    },
+    "description": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Description"
+    },
+    "duration_seconds": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Duration Seconds"
+    },
+    "published_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Published At"
+    },
+    "language": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Language"
+    },
+    "channel_external_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Channel External Id"
+    },
+    "channel_title": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Channel Title"
+    },
+    "segments": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/TranscriptSegment"
+      },
+      "title": "Segments",
+      "type": "array"
+    },
+    "extra": {
+      "additionalProperties": true,
+      "default": {},
+      "title": "Extra",
+      "type": "object"
+    }
+  },
+  "required": [
+    "platform",
+    "kind",
+    "external_id",
+    "url",
+    "title"
+  ],
+  "title": "NormalizedSource",
+  "type": "object"
+}

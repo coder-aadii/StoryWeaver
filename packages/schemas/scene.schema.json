@@ -1,0 +1,174 @@
+{
+  "$defs": {
+    "CameraSpec": {
+      "properties": {
+        "shot": {
+          "default": "medium",
+          "enum": [
+            "wide",
+            "medium",
+            "close_up",
+            "extreme_close_up",
+            "over_shoulder",
+            "aerial"
+          ],
+          "title": "Shot",
+          "type": "string"
+        },
+        "movement": {
+          "default": "static",
+          "enum": [
+            "static",
+            "slow_zoom_in",
+            "slow_zoom_out",
+            "pan_left",
+            "pan_right",
+            "tilt_up",
+            "tilt_down"
+          ],
+          "title": "Movement",
+          "type": "string"
+        }
+      },
+      "title": "CameraSpec",
+      "type": "object"
+    }
+  },
+  "description": "What the AI decides about a scene. Timing is later resolved by code.",
+  "properties": {
+    "scene_id": {
+      "title": "Scene Id",
+      "type": "string"
+    },
+    "sequence": {
+      "minimum": 1,
+      "title": "Sequence",
+      "type": "integer"
+    },
+    "narration": {
+      "title": "Narration",
+      "type": "string"
+    },
+    "duration": {
+      "anyOf": [
+        {
+          "exclusiveMinimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "seconds; set by code",
+      "title": "Duration"
+    },
+    "visual_intent": {
+      "default": "",
+      "title": "Visual Intent",
+      "type": "string"
+    },
+    "characters": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Characters",
+      "type": "array"
+    },
+    "locations": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Locations",
+      "type": "array"
+    },
+    "objects": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Objects",
+      "type": "array"
+    },
+    "action": {
+      "default": "",
+      "title": "Action",
+      "type": "string"
+    },
+    "emotion": {
+      "default": "",
+      "title": "Emotion",
+      "type": "string"
+    },
+    "camera": {
+      "$ref": "#/$defs/CameraSpec",
+      "default": {
+        "shot": "medium",
+        "movement": "static"
+      }
+    },
+    "image_prompt": {
+      "default": "",
+      "title": "Image Prompt",
+      "type": "string"
+    },
+    "negative_prompt": {
+      "default": "",
+      "title": "Negative Prompt",
+      "type": "string"
+    },
+    "voice": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Voice"
+    },
+    "music": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Music"
+    },
+    "sfx": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Sfx",
+      "type": "array"
+    },
+    "subtitle": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Subtitle"
+    }
+  },
+  "required": [
+    "scene_id",
+    "sequence",
+    "narration"
+  ],
+  "title": "SceneSpec",
+  "type": "object"
+}

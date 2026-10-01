@@ -1,0 +1,53 @@
+# Secrets / local config
+.env
+.env.*
+!.env.example
+
+# Generated data (keep the directory skeleton only)
+data/*
+!data/.gitkeep
+!data/*/
+data/*/*
+!data/*/.gitkeep
+
+# Media / models
+*.mp4
+*.mov
+*.wav
+*.mp3
+*.safetensors
+*.ckpt
+*.gguf
+*.onnx
+packages/video/out/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+.pyright/
+*.egg-info/
+
+# Node
+node_modules/
+.next/
+.turbo/
+coverage/
+playwright-report/
+test-results/
+*.tsbuildinfo
+
+# Databases / caches / temp
+*.sqlite
+*.sqlite3
+*.db
+.cache/
+tmp/
+*.log
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/

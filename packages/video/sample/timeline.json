@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "fps": 30,
+  "width": 1280,
+  "height": 720,
+  "scenes": [
+    { "scene_id": "scene_001", "start": 0, "duration": 2.5, "narration": "Long ago, the ice reached the sea.", "subtitle": "Long ago, the ice reached the sea.", "camera": { "shot": "wide", "movement": "slow_zoom_in" } },
+    { "scene_id": "scene_002", "start": 2.5, "duration": 2, "narration": "A small band walked south.", "subtitle": "A small band walked south.", "camera": { "shot": "medium", "movement": "pan_right" } },
+    { "scene_id": "scene_003", "start": 4.5, "duration": 2, "narration": "They carried only fire.", "subtitle": "They carried only fire.", "camera": { "shot": "close_up", "movement": "slow_zoom_out" } }
+  ]
+}

@@ -1,0 +1,9 @@
+packages:
+  - apps/web
+  - packages/video
+
+# Build scripts are denied by default; only allow what is needed.
+allowBuilds:
+  sharp: true
+  unrs-resolver: true
+  esbuild: true
