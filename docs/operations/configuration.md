@@ -17,7 +17,7 @@ Defaults make the app bootable with nothing set: Ollama URL `http://localhost:11
 ## Groups
 
 - **Database:** `DATABASE_URL`. (`POSTGRES_*` in `.env.example` feed Docker Compose only.)
-- **Storage:** `STORAGE_ROOT`, `MAX_UPLOAD_BYTES`.
+- **Storage:** `STORAGE_ROOT`, `MAX_UPLOAD_BYTES`; **Source Library:** `MAX_TRANSCRIPT_BYTES` (5 MB), `CAPTION_LANGUAGES` — both read from the environment but not listed in `.env.example`; see the [environment reference](../reference/environment-reference.md).
 - **Providers:** `OLLAMA_BASE_URL`, `GOOGLE_AI_API_KEY`, `GROK_API_KEY`, `OPENROUTER_API_KEY`, `ANTHROPIC_BASE_URL`, `ANTHROPIC_API_KEY`, `COMFYUI_BASE_URL`, `TEMPORAL_ADDRESS`.
 - **Model routing:** `DEFAULT_LLM_PROVIDER`, `DEFAULT_LLM_MODEL`, `ANALYSIS_LLM_MODEL`, `STORY_LLM_MODEL`, `SCRIPT_LLM_MODEL`, `CLASSIFICATION_LLM_MODEL`, `EMBEDDING_PROVIDER`, `EMBEDDING_MODEL`. `Settings.model_for(task)` falls back to `DEFAULT_LLM_MODEL`. See [model routing](../ai/model-routing.md).
 - **App:** `ENVIRONMENT`, `LOG_LEVEL`, `CORS_ORIGINS` (a JSON array, e.g. `["http://localhost:3100"]`, as parsed by pydantic-settings).

@@ -9,7 +9,7 @@ Planned — not implemented. Nothing automates backups. The commands below are m
 ## What holds state
 
 1. **PostgreSQL** — all metadata, transcripts, versions, embeddings.
-2. **`data/`** — binary assets, transcripts files, renders (once workflows write them; today nothing writes there except what you place manually). Asset rows point into it via `storage_key`.
+2. **`data/`** — raw transcript/caption files (`transcripts/…`, written by the Source Library since P1), and later binary assets and renders (not written yet). A database dump without `data/` loses the raw transcript files — the cleaned text and chunks are in PostgreSQL, but `raw_storage_key` would point at missing files. Asset rows point into it via `storage_key`.
 3. **`.env`** — keep in a password manager, not in backups of the repo.
 4. **The Docker-free cluster** — with `make db-up-nodocker` the entire database lives in `data/temporary/pgdata`. That path is git-ignored (so it is never committed) and sits under a directory named `temporary`, which makes it easy to delete by accident (`rm -rf data/temporary`, or a "clean" script). Treat it as real data: `pg_dump` it (the helper prints the socket URL) before deleting or recreating it. Docker users keep data in the `pgdata` named volume instead; `docker compose down -v` destroys it.
 

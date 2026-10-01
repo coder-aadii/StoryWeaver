@@ -4,7 +4,7 @@
 
 ## Status
 
-**Partially implemented.** Tables and CRUD for projects exist. `ProjectSource` has no API. Pipeline stages that would drive `ProjectStatus` are *Planned — not implemented*.
+**Partially implemented.** Tables and CRUD for projects exist. `ProjectSource` has API endpoints since P1 (`/projects/{id}/sources`) for linking sources to projects. Pipeline stages that would drive `ProjectStatus` are *Planned — not implemented*.
 
 ## Aggregate
 

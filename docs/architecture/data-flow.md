@@ -47,9 +47,9 @@ flowchart TD
 
 | Stage | Owner module | Persists to | State |
 | --- | --- | --- | --- |
-| Source → `NormalizedSource` | `ingestion` | `source_videos`, `channels` | Interface + YouTube URL validation + optional yt-dlp extractor (not run live); persistence workflow Planned |
-| Transcript | `ingestion` | `transcripts` (single `text` + `segments` JSONB; raw-vs-cleaned and raw file location **Decision pending**) | Table + transcriber interface; `extract()` returns metadata only ([KI-15](../reference/status.md#known-issues-and-limitations)); workflow Planned |
-| Chunks / embeddings | `ingestion`, `intelligence` | `transcript_chunks.embedding vector(768)` | Chunker + table + HNSW index + NN test implemented; embedding generation Planned |
+| Source → `NormalizedSource` | `ingestion` | `source_videos`, `channels` | Implemented (P1): `identify` → extractor `extract` (metadata) → service writes `source_videos` and an upserted `channels` row; channel/playlist ingestion Planned |
+| Transcript | `ingestion` | `transcripts` (cleaned `text` + `segments` JSONB, versioned, one `is_current`; raw file via `LocalStorage`) | Implemented (P1): captions or upload → parse → normalize → raw file + new version; speech-to-text Planned |
+| Chunks / embeddings | `ingestion`, `intelligence` | `transcript_chunks` (`search_vector` for keyword search; `embedding vector(768)` unused) | Chunks + keyword search Implemented (P1); embedding generation and semantic search Planned |
 | Understanding → story → script | `story`, `intelligence` | `scripts`, `script_versions` | Tables only; **Planned — not implemented** |
 | Storyboard | `story` | `scenes`, `scene_versions.data` | `SceneSpec` schema + tables; generation Planned |
 | Bibles | `story`/`visual` | `characters`, `locations` | Tables only; no endpoints; `CharacterVersion` deferred |

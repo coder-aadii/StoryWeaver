@@ -26,6 +26,8 @@ class Settings(BaseSettings):
     database_url: str = "postgresql+psycopg://storyweaver:storyweaver@localhost:5433/storyweaver"
     storage_root: Path = REPO_ROOT / "data"
     max_upload_bytes: int = 512 * 1024 * 1024
+    max_transcript_bytes: int = Field(default=5 * 1024 * 1024, gt=0)
+    caption_languages: list[str] = ["en"]  # preference order for platform captions
     llm_timeout_seconds: float = Field(default=120.0, gt=0)
     db_connect_timeout_seconds: int = Field(default=10, ge=1, le=120)
 

@@ -4,7 +4,7 @@
 
 ## Status
 
-**Partially implemented.** `LocalStorage` and the directory skeleton exist and are tested; no API route or workflow writes files yet. S3/MinIO is **Planned — not implemented**.
+**Partially implemented.** `LocalStorage` and the directory skeleton exist and are tested, and the Source Library ingestion writes raw transcript files through it (P1); no other route or workflow writes files, and nothing serves them. S3/MinIO is **Planned — not implemented**.
 
 ## Purpose
 
@@ -43,7 +43,7 @@ Generate → stream to `.part` → hash → rename → update asset row. Reads s
 
 ## Failure modes
 
-Disk full / write error → `.part` removed in `finally`, no partial file visible; oversize upload → the typed `FileTooLargeError`, mapped to HTTP 413 `file_too_large` (no route uses `put` yet — [KI-9](../reference/status.md#known-issues-and-limitations)); traversal attempt → `UnsafePathError`; row without file or file without row → reconcile job **Planned — not implemented** ([operations/recovery](../operations/recovery.md)).
+Disk full / write error → `.part` removed in `finally`, no partial file visible; oversize upload → the typed `FileTooLargeError`, mapped to HTTP 413 `file_too_large` (`put` is used by transcript ingestion — [KI-9](../reference/status.md#known-issues-and-limitations), partly resolved in P1); traversal attempt → `UnsafePathError`; row without file or file without row → reconcile job **Planned — not implemented** ([operations/recovery](../operations/recovery.md)).
 
 ## Extension points
 

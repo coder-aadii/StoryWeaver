@@ -4,7 +4,7 @@
 
 ## Status
 
-**Partially implemented.** The `WorkflowRunner` abstraction and an in-process `LocalRunner` exist and nothing uses them yet. Temporal is **Planned — not implemented** (compose profile only).
+**Partially implemented.** The `WorkflowRunner` abstraction, an in-process `LocalRunner` (and an `InlineRunner` for tests) exist; since P1 the Source Library ingestion (`source.add`, `source.fetch_transcript`) submits to the runner and records each run in the persisted `workflow_runs` table. Temporal is **Planned — not implemented** (compose profile only).
 
 ## Purpose
 
@@ -18,7 +18,7 @@ Keep job execution behind an interface so first boot needs no extra service whil
 - `LocalRunner(max_workers=2)`: `ThreadPoolExecutor`; id = `<name>-<12 hex>`; logs `workflow.started`, `workflow.finished` (`status=ok`) or `workflow.failed` (`status=failed`, `error`) via structlog; swallows the future's exception after logging so the app keeps running.
 - `get_runner()`: lazily created module singleton.
 
-Not present: persistence of job state, progress reporting, cancellation, result retrieval, scheduling, concurrency control per entity, and any caller. No route submits a job.
+Present since P1: persisted run state (`queued/running/succeeded/failed/interrupted`), a minimal `progress` document, a single-active-run guarantee per `(kind, subject)` (partial unique index), startup reconciliation, and callers (`POST /sources/from-url`, `POST /sources/{id}/retry`). Not present: automatic retry/backoff, cancellation, result retrieval, scheduling, a generic retry endpoint.
 
 ## Target architecture
 

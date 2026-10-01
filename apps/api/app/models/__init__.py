@@ -16,10 +16,11 @@ from app.models.domain import (
     Topic,
     Transcript,
     TranscriptChunk,
+    WorkflowRun,
 )
 
 __all__ = [
     "Asset", "Channel", "Character", "Collection", "CollectionVideo", "Location", "Project",
     "ProjectSource", "Render", "Scene", "SceneVersion", "Script", "ScriptVersion", "SourceVideo",
-    "Topic", "Transcript", "TranscriptChunk",
+    "Topic", "Transcript", "TranscriptChunk", "WorkflowRun",
 ]  # fmt: skip

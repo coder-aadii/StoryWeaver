@@ -1,0 +1,6 @@
+{"wireMagic": "pb3", "events": [
+  {"tStartMs": 0, "dDurationMs": 2500, "id": 1, "wpWinPosId": 1, "wsWinStyleId": 1},
+  {"tStartMs": 0, "dDurationMs": 2500, "segs": [{"utf8": "Welcome "}, {"utf8": "to the show.", "tOffsetMs": 600}]},
+  {"tStartMs": 2500, "dDurationMs": 1500, "segs": [{"utf8": "\n"}]},
+  {"tStartMs": 2500, "dDurationMs": 4500, "segs": [{"utf8": "Today we talk"}, {"utf8": " about\nvolcanoes."}]}
+]}

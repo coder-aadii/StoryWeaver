@@ -30,5 +30,25 @@ class InvalidSourceError(StoryWeaverError):
     """A user-supplied URL/source failed validation."""
 
 
+class UnsupportedSourceKindError(InvalidSourceError):
+    """A valid URL of a kind this release cannot import yet (channel, playlist)."""
+
+
+class SourceUnavailableError(StoryWeaverError):
+    """The remote video is private, removed, region-blocked or otherwise cannot be read."""
+
+
+class NoCaptionsError(StoryWeaverError):
+    """The source has no captions in any acceptable language."""
+
+
+class TranscriptParseError(StoryWeaverError, ValueError):
+    """A transcript file could not be parsed. `line` points at the offending input line, if known."""
+
+    def __init__(self, message: str, *, line: int | None = None) -> None:
+        super().__init__(f"line {line}: {message}" if line else message)
+        self.line = line
+
+
 class FileTooLargeError(StoryWeaverError, ValueError):
     """An upload/stream exceeded the configured size cap. (Also a ValueError for older callers.)"""

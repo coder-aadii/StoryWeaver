@@ -1,0 +1,129 @@
+{
+  "_fixture_note": "Recorded with yt-dlp metadata-only extraction on 2026-10-01 for video jNQXAC9IVRw; formats removed and URL query values redacted.",
+  "age_limit": 0,
+  "automatic_captions": {
+    "de": [
+      {
+        "ext": "vtt",
+        "protocol": "m3u8_native",
+        "url": "https://manifest.googlevideo.com/api/manifest/hls_timedtext_playlist/expire/1790883660/ei/7GK-ari8D7vw9fwPgeaC6QY/ip/2401:4900:1ca3:17c9:9b89:81f:c80d:90cb/id/8cd417002f48551c/source/youtube/requiressl/yes/dur/18.933/tts_params/caps%3Dasr%26v%3DjNQXAC9IVRw%26lang%3Dde%26ip%3D2401:4900:1ca3:17c9:9b89:81f:c80d:90cb%26ipbits%3D0%26expire%3D1790883660%26sparams%3Dip,ipbits,expire,caps,v%26signature%3D8FEC47C838F568FDFA36735FF638E41336C1E164.8D006535A75B29196ADEF9E70483FD8856285A3C%26key%3Ddg_yt0/rqh/4/hls_chunk_host/rr9---sn-ci5gup-civl.googlevideo.com/xpc/EgVo2aDSNQ%3D%3D/cps/733/met/1790862060,/mh/VD/mm/18,29/mn/sn-ci5gup-civl,sn-ci5gup-cvhe6/ms/aub,rdu/mv/m/mvi/9/pl/54/rms/aub,aub/initcwndbps/1611750/bui/AWzQHwrhLTFDaWmE6icW52MPaHzqBLZB37WxPQYtnw6uRV8Cc4mFSiFD44_xvv14QFPXfysjcaxVTQQd/spc/I-rgIQx1faKN-iP3tES5NBw6Ohw9iDM1SER3aYQ9jvC_1ICIfKx75QW-BgCa/vprv/1/playlist_type/DVR/mt/1790861601/fvip/3/short_key/1/keepalive/yes/fexp/51565116,52112904,52184227/sparams/expire,ei,ip,id,source,requiressl,dur,tts_params,rqh,xpc,bui,spc,vprv,playlist_type/sig/AE0s2JYwRgIhAMM8JizEB8xGIW-K6qVN5VrKjanH4SYeACvuG5SAAFMjAiEAoGg6BHpl1sZpw1lh19xpnU0poI8F3lYz8C7hNdZ81k8%3D/lsparams/hls_chunk_host,cps,met,mh,mm,mn,ms,mv,mvi,pl,rms,initcwndbps/lsig/APaTxxMwRgIhALIIYfDqVl6DkcZgqBjdeodc_G-hNnHgcN54-zG84bM5AiEAx0oOu8Yy4MGHTRjRjwhPcST2x1Jtjopze5oi0anILeo%3D/playlist/index.m3u8"
+      }
+    ],
+    "en": [
+      {
+        "ext": "vtt",
+        "protocol": "m3u8_native",
+        "url": "https://manifest.googlevideo.com/api/manifest/hls_timedtext_playlist/expire/1790883660/ei/7GK-ari8D7vw9fwPgeaC6QY/ip/2401:4900:1ca3:17c9:9b89:81f:c80d:90cb/id/8cd417002f48551c/source/youtube/requiressl/yes/dur/18.933/tts_params/caps%3Dasr%26v%3DjNQXAC9IVRw%26lang%3Den%26ip%3D2401:4900:1ca3:17c9:9b89:81f:c80d:90cb%26ipbits%3D0%26expire%3D1790883660%26sparams%3Dip,ipbits,expire,caps,v%26signature%3D02A44B867F0F35F1DDC35EB20EFF064C78625C2E.59F3E82EAFD4F5358606CBFEA9AFC4F0ED0C4D98%26key%3Ddg_yt0/rqh/4/hls_chunk_host/rr9---sn-ci5gup-civl.googlevideo.com/xpc/EgVo2aDSNQ%3D%3D/cps/733/met/1790862060,/mh/VD/mm/18,29/mn/sn-ci5gup-civl,sn-ci5gup-cvhe6/ms/aub,rdu/mv/m/mvi/9/pl/54/rms/aub,aub/initcwndbps/1611750/bui/AWzQHwrhLTFDaWmE6icW52MPaHzqBLZB37WxPQYtnw6uRV8Cc4mFSiFD44_xvv14QFPXfysjcaxVTQQd/spc/I-rgIQx1faKN-iP3tES5NBw6Ohw9iDM1SER3aYQ9jvC_1ICIfKx75QW-BgCa/vprv/1/playlist_type/DVR/mt/1790861601/fvip/3/short_key/1/keepalive/yes/fexp/51565116,52112904,52184227/sparams/expire,ei,ip,id,source,requiressl,dur,tts_params,rqh,xpc,bui,spc,vprv,playlist_type/sig/AE0s2JYwRgIhAJ402i7AM0VpcszYGQnUOfNOeAPtES7Nv5TlBW4VSfI3AiEAzZfrN1nW8pnvy3FYMW21EoYDtkiwNsd4lyJWn5iTWj4%3D/lsparams/hls_chunk_host,cps,met,mh,mm,mn,ms,mv,mvi,pl,rms,initcwndbps/lsig/APaTxxMwRQIhAMxbGKsVgvx-fDk5BEUPUlZW-PmT15KlvPPgog_pzkKjAiBn-hJ4xsOkc7mDC9khsArf57Y7YKQ6m7wic2YM_8Eqhw%3D%3D/playlist/index.m3u8"
+      }
+    ]
+  },
+  "availability": "public",
+  "categories": [
+    "Film & Animation"
+  ],
+  "channel": "jawed",
+  "channel_id": "UC4QobU6STFB0P71PMvOGN5A",
+  "description": "Microplastics are accumulating in human brains at an alarming rate\nhttps://www.youtube.com/watch?v=0PT5c1z3LL8\n\n\u201cNanoplastics and Human Health\u201d with Matthew J Campen, PhD, MSPH\nhttps://www.youtube.com/watch?v=RRBN_4L09Mg\n\n00:00 Intro\n00:05 The cool thing\n00:17 End",
+  "duration": 19,
+  "id": "jNQXAC9IVRw",
+  "language": null,
+  "like_count": 19968769,
+  "live_status": "not_live",
+  "subtitles": {
+    "de": [
+      {
+        "ext": "json3",
+        "name": "German",
+        "url": "https://www.youtube.com/api/timedtext?v=REDACTED&ei=REDACTED&opi=REDACTED&xoaf=REDACTED&xowf=REDACTED&hl=en&ip=REDACTED&ipbits=REDACTED&expire=REDACTED&sparams=REDACTED&signature=REDACTED&key=REDACTED&lang=de&fmt=json3"
+      },
+      {
+        "ext": "srv1",
+        "name": "German",
+        "url": "https://www.youtube.com/api/timedtext?v=REDACTED&ei=REDACTED&opi=REDACTED&xoaf=REDACTED&xowf=REDACTED&hl=en&ip=REDACTED&ipbits=REDACTED&expire=REDACTED&sparams=REDACTED&signature=REDACTED&key=REDACTED&lang=de&fmt=srv1"
+      },
+      {
+        "ext": "srv2",
+        "name": "German",
+        "url": "https://www.youtube.com/api/timedtext?v=REDACTED&ei=REDACTED&opi=REDACTED&xoaf=REDACTED&xowf=REDACTED&hl=en&ip=REDACTED&ipbits=REDACTED&expire=REDACTED&sparams=REDACTED&signature=REDACTED&key=REDACTED&lang=de&fmt=srv2"
+      },
+      {
+        "ext": "srv3",
+        "name": "German",
+        "url": "https://www.youtube.com/api/timedtext?v=REDACTED&ei=REDACTED&opi=REDACTED&xoaf=REDACTED&xowf=REDACTED&hl=en&ip=REDACTED&ipbits=REDACTED&expire=REDACTED&sparams=REDACTED&signature=REDACTED&key=REDACTED&lang=de&fmt=srv3"
+      },
+      {
+        "ext": "ttml",
+        "name": "German",
+        "url": "https://www.youtube.com/api/timedtext?v=REDACTED&ei=REDACTED&opi=REDACTED&xoaf=REDACTED&xowf=REDACTED&hl=en&ip=REDACTED&ipbits=REDACTED&expire=REDACTED&sparams=REDACTED&signature=REDACTED&key=REDACTED&lang=de&fmt=ttml"
+      },
+      {
+        "ext": "srt",
+        "name": "German",
+        "url": "https://www.youtube.com/api/timedtext?v=REDACTED&ei=REDACTED&opi=REDACTED&xoaf=REDACTED&xowf=REDACTED&hl=en&ip=REDACTED&ipbits=REDACTED&expire=REDACTED&sparams=REDACTED&signature=REDACTED&key=REDACTED&lang=de&fmt=srt"
+      },
+      {
+        "ext": "vtt",
+        "name": "German",
+        "url": "https://www.youtube.com/api/timedtext?v=REDACTED&ei=REDACTED&opi=REDACTED&xoaf=REDACTED&xowf=REDACTED&hl=en&ip=REDACTED&ipbits=REDACTED&expire=REDACTED&sparams=REDACTED&signature=REDACTED&key=REDACTED&lang=de&fmt=vtt"
+      }
+    ],
+    "en": [
+      {
+        "ext": "json3",
+        "name": "English",
+        "url": "https://www.youtube.com/api/timedtext?v=REDACTED&ei=REDACTED&opi=REDACTED&xoaf=REDACTED&xowf=REDACTED&hl=en&ip=REDACTED&ipbits=REDACTED&expire=REDACTED&sparams=REDACTED&signature=REDACTED&key=REDACTED&lang=en&fmt=json3"
+      },
+      {
+        "ext": "srv1",
+        "name": "English",
+        "url": "https://www.youtube.com/api/timedtext?v=REDACTED&ei=REDACTED&opi=REDACTED&xoaf=REDACTED&xowf=REDACTED&hl=en&ip=REDACTED&ipbits=REDACTED&expire=REDACTED&sparams=REDACTED&signature=REDACTED&key=REDACTED&lang=en&fmt=srv1"
+      },
+      {
+        "ext": "srv2",
+        "name": "English",
+        "url": "https://www.youtube.com/api/timedtext?v=REDACTED&ei=REDACTED&opi=REDACTED&xoaf=REDACTED&xowf=REDACTED&hl=en&ip=REDACTED&ipbits=REDACTED&expire=REDACTED&sparams=REDACTED&signature=REDACTED&key=REDACTED&lang=en&fmt=srv2"
+      },
+      {
+        "ext": "srv3",
+        "name": "English",
+        "url": "https://www.youtube.com/api/timedtext?v=REDACTED&ei=REDACTED&opi=REDACTED&xoaf=REDACTED&xowf=REDACTED&hl=en&ip=REDACTED&ipbits=REDACTED&expire=REDACTED&sparams=REDACTED&signature=REDACTED&key=REDACTED&lang=en&fmt=srv3"
+      },
+      {
+        "ext": "ttml",
+        "name": "English",
+        "url": "https://www.youtube.com/api/timedtext?v=REDACTED&ei=REDACTED&opi=REDACTED&xoaf=REDACTED&xowf=REDACTED&hl=en&ip=REDACTED&ipbits=REDACTED&expire=REDACTED&sparams=REDACTED&signature=REDACTED&key=REDACTED&lang=en&fmt=ttml"
+      },
+      {
+        "ext": "srt",
+        "name": "English",
+        "url": "https://www.youtube.com/api/timedtext?v=REDACTED&ei=REDACTED&opi=REDACTED&xoaf=REDACTED&xowf=REDACTED&hl=en&ip=REDACTED&ipbits=REDACTED&expire=REDACTED&sparams=REDACTED&signature=REDACTED&key=REDACTED&lang=en&fmt=srt"
+      },
+      {
+        "ext": "vtt",
+        "name": "English",
+        "url": "https://www.youtube.com/api/timedtext?v=REDACTED&ei=REDACTED&opi=REDACTED&xoaf=REDACTED&xowf=REDACTED&hl=en&ip=REDACTED&ipbits=REDACTED&expire=REDACTED&sparams=REDACTED&signature=REDACTED&key=REDACTED&lang=en&fmt=vtt"
+      }
+    ]
+  },
+  "tags": [
+    "me at the zoo",
+    "jawed karim",
+    "first youtube video"
+  ],
+  "thumbnail": "https://i.ytimg.com/vi/jNQXAC9IVRw/hqdefault.jpg?sqp=-oaymwEmCOADEOgC8quKqQMa8AEB-AG-AoAC8AGKAgwIABABGFUgWShlMA-i85f_Aw4I--P_qwYY4OoEIOCoAQ==&rs=AOn4CLCUmu3Am4mNJNHKGyFgol8lgStGhg&usqp=CBU",
+  "thumbnails": [
+    {
+      "url": "https://i.ytimg.com/vi/jNQXAC9IVRw/maxresdefault.jpg"
+    },
+    {
+      "url": "https://i.ytimg.com/vi_webp/jNQXAC9IVRw/maxresdefault.webp"
+    }
+  ],
+  "timestamp": 1114313512,
+  "title": "Me at the zoo",
+  "upload_date": "20050424",
+  "uploader": "jawed",
+  "uploader_id": "@jawed",
+  "view_count": 438805324,
+  "webpage_url": "https://www.youtube.com/watch?v=jNQXAC9IVRw"
+}

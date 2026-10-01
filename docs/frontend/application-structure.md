@@ -14,15 +14,18 @@ apps/web/
 │   ├── app/                    App Router pages (all under the shared layout)
 │   │   ├── layout.tsx          fonts, metadata template, <Providers><AppShell>
 │   │   ├── page.tsx            redirect("/dashboard")
-│   │   ├── dashboard/ sources/ (channels/, videos/) topics/ collections/
+│   │   ├── dashboard/ sources/ (channels/, videos/ [+ videos/[id]]) topics/ collections/
 │   │   ├── projects/ (page.tsx, [id]/page.tsx)  studio/  settings/
 │   │   └── globals.css         Tailwind 4 + shadcn CSS variables
 │   ├── components/
 │   │   ├── app-shell.tsx  api-status.tsx  page-header.tsx  providers.tsx
 │   │   ├── resource-list.tsx  states.tsx  status-badge.tsx
-│   │   └── ui/                 shadcn primitives: badge, button, card, skeleton, table
-│   └── lib/                    api.ts (client + types), store.ts (Zustand), format.ts, utils.ts (cn)
-├── e2e/navigation.spec.ts      Playwright
+│   │   ├── sources/            add-source-dialog, sources-browser, source-views, source-detail,
+│   │   │                       project-sources, use-run / use-retry hooks, safe-snippet (Source Library, P1)
+│   │   └── ui/                 shadcn primitives: badge, button, card, dialog, input, label, skeleton, table, tabs, textarea
+│   ├── test/utils.tsx          test helpers (query client, fetch mocks)
+│   └── lib/                    api.ts (client + ApiError), sources-api.ts (typed Source Library helpers + types), store.ts (Zustand), format.ts, utils.ts (cn)
+├── e2e/navigation.spec.ts  sources.spec.ts   Playwright
 ├── vitest.config.ts  vitest.setup.ts  playwright.config.ts
 ├── next.config.ts              transpilePackages: ["@storyweaver/video"]
 └── AGENTS.md / CLAUDE.md       scaffold files from Next.js (agent hints)
@@ -33,7 +36,7 @@ apps/web/
 - `@/` alias maps to `src/`.
 - Pages that pass render functions (e.g. table `columns`) to `ResourceList` are **client components** (`"use client"`), because functions cannot cross the server→client boundary. Pages with static content (`/sources`) stay server components and export `metadata`.
 - Server state goes through TanStack Query; UI-only state through Zustand ([state-management.md](state-management.md)).
-- Shared domain types currently live in `lib/api.ts` (Project, Health, Ready, ProviderHealth); simple list pages declare local interfaces. A generated TypeScript client from OpenAPI is *Decision pending*.
+- Shared domain types currently live in `lib/api.ts` (Project, Health, Ready, ProviderHealth) and, for the Source Library, `lib/sources-api.ts` (hand-mirrored from `apps/api/app/schemas/source_api.py`, so the two must be kept in sync by hand); simple list pages declare local interfaces. `ApiError` carries `status`, the server's `code` and a readable `message` (it joins FastAPI validation messages). Query keys are `["/sources", …]` and `["/runs", id]`; a finished run invalidates the source queries. A generated TypeScript client from OpenAPI is *Decision pending*.
 - Do not edit `components/ui/*` by hand-formatting; the Prettier ignore file excludes it. Add primitives with `pnpm dlx shadcn@latest add <name>`.
 - The workspace package `@storyweaver/video` is consumed as TypeScript source.
 

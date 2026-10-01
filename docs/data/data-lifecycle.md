@@ -12,18 +12,18 @@ Today only via `POST /api/v1/<resource>`; nothing creates rows automatically. Ta
 
 ## State
 
-Statuses are plain columns; the API lets a client PATCH any valid value (no transition guard). Target lifecycles: source `discovered→importing→imported|failed`; transcript `pending→processing→ready|failed`; asset `pending→generating→ready|failed`; render `queued→rendering→completed|failed`. Failures should write `status=failed` + `error` and be retryable ([workflows/retry-and-recovery](../workflows/retry-and-recovery.md)).
+Statuses are plain columns; the API lets a client PATCH any valid value (no transition guard). Source and transcript statuses are now written by the ingestion service (source `importing→imported|failed`, with `discovered` reserved for the future channel scan; transcript `ready|failed`; run `queued→running→succeeded|failed|interrupted`). Target lifecycles for the rest: transcript `pending→processing→ready|failed`; asset `pending→generating→ready|failed`; render `queued→rendering→completed|failed`. Failures should write `status=failed` + `error` and be retryable ([workflows/retry-and-recovery](../workflows/retry-and-recovery.md)).
 
 ## Versioning
 
-Scripts and scenes get new rows in `*_versions` (never edited in place by convention). Transcripts have a `transcripts.version` column, but versioning is a **target**: the API cannot set `version` (default 1), so a second transcript for the same video collides on `(source_video_id, 1)` and returns 409 ([KI-13](../reference/status.md#known-issues-and-limitations)). Immutability of `*_versions` rows is a convention — no constraint or API enforces it. Assets and characters are unversioned.
+Scripts and scenes get new rows in `*_versions` (never edited in place by convention). Transcripts are versioned **and implemented** (P1): the ingestion service creates `version + 1` as the single `is_current` row, older versions stay as history with their chunks (not searchable), and the raw file of every version is kept under `transcripts/<source_id>/v<n>/` until the source is deleted ([KI-13](../reference/status.md#known-issues-and-limitations), resolved). There is no retention/expiry. Immutability of `*_versions` rows is a convention — no constraint or API enforces it. Assets and characters are unversioned.
 
 ## Deletion (hard, cascading)
 
 | Deleting | Effect |
 | --- | --- |
 | channel | videos kept, `channel_id` → NULL |
-| source_video | transcripts, chunks, collection and project links deleted |
+| source_video | transcripts, chunks and collection/project links deleted by cascade; its `workflow_runs` and raw transcript files are removed by the service. The API refuses to delete a source that a project still links (409 `source_in_use`) |
 | project | scripts(+versions), scenes(+versions), characters, locations, assets, renders, project_sources deleted |
 | script | scenes kept, `script_id` → NULL |
 | scene | scene_versions deleted; assets kept, `scene_id` → NULL |

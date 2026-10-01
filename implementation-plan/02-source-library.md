@@ -108,7 +108,7 @@ Likely, not mandatory: if the repository's conventions at implementation time fa
 
 ### 5.4 Normalization (deterministic, versioned)
 
-`normalize_segments(segments) -> list[TranscriptSegment]`, `NORMALIZER_VERSION = "1"`:
+`normalize_segments(segments) -> list[TranscriptSegment]`, `NORMALIZER_VERSION = "1"` at planning time (shipped as `"2"` after KI-27, see [status](../docs/reference/status.md#known-issues-and-limitations)):
 
 1. NFC-normalize; strip control characters (keep `\n`); strip HTML-like caption tags (`<c>`, `<00:00:01.000>`), keep `[Music]`-style annotations as text (decision: keep, they are source content; revisit in P3).
 2. Collapse whitespace; drop empty segments.

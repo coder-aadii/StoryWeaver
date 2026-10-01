@@ -12,10 +12,11 @@ Implemented.
 - Isolation: `conftest.py` overrides `DATABASE_URL` and provider keys in the environment for the whole session (so a DB-less test can never reach a real database or provider) and resets the cached settings, engine and sessionmaker around the DB fixtures; results are order-independent (previously KI-11, resolved in P0). `tests/test_migrations.py` checks up → down → up and `alembic check`.
 - `db`: a Session; after each test, `TRUNCATE ... CASCADE` on all tables except `alembic_version`.
 - `client`: `TestClient` with `get_db` overridden to the test session.
+- `api` (P1): a `TestClient` whose requests each get their **own** session (like production), with background work run inline (`InlineRunner`) and `STORAGE_ROOT` pointed at a temp directory (`storage_root`), so uploads and raw transcript files never touch the repository's `data/`. Used by the Source Library API and service tests.
 
 ## Covered (`test_models.py`, `test_migrations.py`, and the DB-backed cases in `test_api.py`, `test_api_hardening.py`, `test_health.py`)
 
-Migrations up → down → up and `alembic check` (`test_migrations.py`); API round trips, 404/409 bodies with `code`, valid PATCH and clearing nullable fields. Models: defaults and timestamps; one `SourceVideo` shared by two projects (join table); unique `(scene_id, version)` on `scene_versions`; embedding round trip and nearest neighbour via `cosine_distance`. Also `/health/ready` against the real DB.
+Migrations up → down → up and `alembic check` (`test_migrations.py`); API round trips, 404/409 bodies with `code`, valid PATCH and clearing nullable fields. Source Library schema (`test_models_p1.py`): upload sources (null `url`, `kind`), the partial unique index allowing one current transcript per source, the generated `search_vector` + GIN index, `workflow_runs` constraints (`test_runs.py`: one active run per `(kind, subject)`, lifecycle, reconciliation). Models: defaults and timestamps; one `SourceVideo` shared by two projects (join table); unique `(scene_id, version)` on `scene_versions`; embedding round trip and nearest neighbour via `cosine_distance`. Also `/health/ready` against the real DB.
 
 ## Running
 

@@ -18,12 +18,6 @@ from app.core.errors import (
     UnsafePathError,
 )
 
-GOOD_VIDEO = {
-    "external_id": "dQw4w9WgXcQ",
-    "url": "https://youtu.be/dQw4w9WgXcQ",
-    "title": "t",
-}
-
 
 # ---- schema-level validation: needs no database -----------------------------------------------
 @pytest.mark.parametrize("field", ["title", "status"])
@@ -50,15 +44,28 @@ def test_patch_unknown_field_is_422(plain_client: TestClient) -> None:
         "https://evil.example/watch?v=dQw4w9WgXcQ",
         "file:///etc/passwd",
         "javascript:alert(1)",
-        "https://www.youtube.com/@SomeChannel/videos",  # a channel URL is not a video URL
         "https://youtube.com.evil.example/watch?v=dQw4w9WgXcQ",
     ],
 )
-def test_create_source_rejects_non_video_or_non_youtube_urls(
-    plain_client: TestClient, url: str
-) -> None:
-    r = plain_client.post("/api/v1/sources", json={**GOOD_VIDEO, "url": url})
-    assert r.status_code == 422
+def test_from_url_rejects_non_youtube_urls(plain_client: TestClient, url: str) -> None:
+    r = plain_client.post("/api/v1/sources/from-url", json={"url": url})
+    assert r.status_code == 422 and r.json()["code"] == "invalid_source"
+
+
+def test_from_url_rejects_channel_urls_with_a_clear_code(plain_client: TestClient) -> None:
+    r = plain_client.post(
+        "/api/v1/sources/from-url", json={"url": "https://www.youtube.com/@SomeChannel/videos"}
+    )
+    assert r.status_code == 422 and r.json()["code"] == "unsupported_kind"
+    assert "later release" in r.json()["detail"]
+
+
+def test_raw_source_and_transcript_write_routes_are_gone(plain_client: TestClient) -> None:
+    """KI-12/KI-13: sources and transcripts are only created through the validating service."""
+    assert plain_client.post("/api/v1/sources", json={"title": "x"}).status_code == 405
+    assert plain_client.post("/api/v1/transcripts", json={}).status_code == 405
+    assert plain_client.patch(f"/api/v1/transcripts/{uuid.uuid4()}", json={}).status_code == 405
+    assert plain_client.delete(f"/api/v1/transcripts/{uuid.uuid4()}").status_code == 405
 
 
 def test_create_channel_requires_a_channel_url(plain_client: TestClient) -> None:
@@ -67,8 +74,8 @@ def test_create_channel_requires_a_channel_url(plain_client: TestClient) -> None
 
 
 def test_other_platforms_need_http_urls(plain_client: TestClient) -> None:
-    body = {**GOOD_VIDEO, "platform": "vimeo", "url": "ftp://x/y"}
-    assert plain_client.post("/api/v1/sources", json=body).status_code == 422
+    body = {"platform": "vimeo", "external_id": "1", "title": "c", "url": "ftp://x/y"}
+    assert plain_client.post("/api/v1/channels", json=body).status_code == 422
 
 
 # ---- exception mapping -------------------------------------------------------------------------
@@ -199,8 +206,13 @@ def test_error_bodies_are_uniform_for_not_found_and_conflicts(client: TestClient
         "detail": "projects not found",
         "code": "not_found",
     }
-    assert client.post("/api/v1/sources", json=GOOD_VIDEO).status_code == 201
-    dup = client.post("/api/v1/sources", json=GOOD_VIDEO)
+    channel = {
+        "external_id": "UC" + "a" * 22,
+        "title": "c",
+        "url": "https://www.youtube.com/channel/UC" + "a" * 22,
+    }
+    assert client.post("/api/v1/channels", json=channel).status_code == 201
+    dup = client.post("/api/v1/channels", json=channel)
     assert dup.status_code == 409 and dup.json()["code"] == "duplicate"
     bad_fk = client.post("/api/v1/scenes", json={"project_id": str(uuid.uuid4()), "sequence": 1})
     assert bad_fk.status_code == 409 and bad_fk.json()["code"] == "invalid_reference"

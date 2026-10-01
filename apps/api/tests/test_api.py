@@ -21,12 +21,6 @@ def test_invalid_status_rejected(client: TestClient) -> None:
     assert client.patch(f"/api/v1/projects/{pid}", json={"status": "nope"}).status_code == 422
 
 
-def test_duplicate_source_conflicts(client: TestClient) -> None:
-    payload = {"external_id": "dQw4w9WgXcQ", "url": "https://youtu.be/dQw4w9WgXcQ", "title": "t"}
-    assert client.post("/api/v1/sources", json=payload).status_code == 201
-    assert client.post("/api/v1/sources", json=payload).status_code == 409
-
-
 def test_bad_foreign_key_is_409_not_500(client: TestClient) -> None:
     r = client.post("/api/v1/scenes", json={"project_id": str(uuid.uuid4()), "sequence": 1})
     assert r.status_code == 409

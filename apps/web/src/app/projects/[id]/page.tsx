@@ -3,6 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 import { PageHeader } from "@/components/page-header";
+import { ProjectSources } from "@/components/sources/project-sources";
 import { ErrorState, LoadingRows } from "@/components/states";
 import { StatusBadge } from "@/components/status-badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,6 +32,9 @@ export default function ProjectPage() {
       </PageHeader>
       <p className="text-muted-foreground mb-4 text-sm">Created {formatDate(data.created_at)}</p>
       {data.error && <ErrorState message={data.error} />}
+      <div className="mb-4">
+        <ProjectSources projectId={id} />
+      </div>
       <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {STAGES.map((s) => (
           <Card key={s}>

@@ -38,6 +38,25 @@ class LocalRunner:
         return workflow_id
 
 
+class InlineRunner:
+    """Runs the workflow immediately, in the caller's thread. For tests and deterministic tooling."""
+
+    def submit(self, name: str, fn: Callable[..., Any], /, *args: Any, **kwargs: Any) -> str:
+        workflow_id = f"{name}-{uuid.uuid4().hex[:12]}"
+        log = get_logger(workflow_id=workflow_id, workflow=name)
+        try:
+            fn(*args, **kwargs)
+        except Exception as exc:
+            log.error("workflow.failed", status="failed", error=f"{type(exc).__name__}: {exc}")
+        return workflow_id
+
+
+def set_runner(runner: WorkflowRunner | None) -> None:
+    """Replace the process-wide runner (None restores the default LocalRunner on next use)."""
+    global _runner
+    _runner = runner
+
+
 _runner: WorkflowRunner | None = None
 
 

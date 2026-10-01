@@ -48,8 +48,8 @@ flowchart LR
 | `ImageGenerator` | `visual/base.py` | `MockImageGenerator` (64×36 placeholder PNG, `metadata.mock=True`), `ComfyUIProvider` | ComfyUI `generate()` raises `ProviderError("… not implemented yet")`; `get_image_generator()` returns ComfyUI only if `COMFYUI_BASE_URL` is set |
 | `VoiceProvider` | `voice/base.py` | `UnconfiguredVoiceProvider` | always raises `ProviderNotConfiguredError` |
 | `Transcriber` | `ingestion/transcription.py` | `FasterWhisperTranscriber` | lazy import; extra `transcription`; never run |
-| `SourceExtractor` | `ingestion/base.py` | `YouTubeExtractor` | URL validation tested; yt-dlp extraction never run |
-| `Storage` | `core/storage.py` | `LocalStorage` | tested; no route uses it yet |
+| `SourceExtractor` | `ingestion/base.py` (+ `registry.py`) | `YouTubeExtractor` | `identify`/URL validation, metadata and caption fetch tested with recorded fixtures; run live once (one public video) on 2026-10-01 |
+| `Storage` | `core/storage.py` | `LocalStorage` | tested; used by the Source Library for raw transcripts |
 
 Configuration: `*_API_KEY`, `*_BASE_URL`, model names — all in `Settings`; keys are read server-side only; `/health/providers` exposes booleans (never values).
 

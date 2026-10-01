@@ -4,7 +4,7 @@
 
 ## Status
 
-**Partially implemented.** `LocalStorage` and the `data/` skeleton exist and are unit-tested. No API endpoint uploads files and no workflow writes assets yet. MinIO/S3 is **Future** ([ADR-008](../decisions/ADR-008-storage-strategy.md)).
+**Partially implemented.** `LocalStorage` and the `data/` skeleton exist and are unit-tested. **Only raw transcripts are written today** (P1, `transcripts/<source_id>/v<n>/raw.<ext>`, by the ingestion service through transcript upload/attach and caption fetch); no image/audio/video upload, no workflow writes assets, and nothing serves files yet. MinIO/S3 is **Future** ([ADR-008](../decisions/ADR-008-storage-strategy.md)).
 
 ## Directory layout (implemented skeleton)
 
@@ -14,7 +14,7 @@ data/                  (contents git-ignored; .gitkeep files keep the skeleton)
   music/    sfx/          projects/    renders/ temporary/
 ```
 
-Root: `STORAGE_ROOT` (default `<repo>/data` when unset or empty; relative values resolve against the repository root). Bucket names are listed in `app/core/storage.py` (`BUCKETS`). What each directory *will* hold (none is populated by code today): optional source media (`sources`) — **the source library does not require downloading media**; metadata, transcripts, chunks and embeddings are enough, and downloading is an optional future capability when a workflow genuinely needs it; transcript files (`transcripts`) — if raw transcripts are stored as files, the DB has **no column to record the key** (*Decision pending*, see [source-data-model](source-data-model.md)), exported vectors if ever needed (`embeddings`), per-asset-type media, per-project working files (`projects`), final MP4s (`renders`), scratch (`temporary`). The key naming convention (e.g. `images/<project_id>/<scene_id>/<asset_id>.png`) is *Decision pending*.
+Root: `STORAGE_ROOT` (default `<repo>/data` when unset or empty; relative values resolve against the repository root). Bucket names are listed in `app/core/storage.py` (`BUCKETS`). What each directory holds: **`transcripts`** — raw transcript/caption files exactly as received, `transcripts/<source_id>/v<n>/raw.<ext>`, the only directory populated by code today (the key is recorded in `transcripts.raw_storage_key`, with `raw_sha256`; see [source-data-model](source-data-model.md)). The rest are reserved: optional source media (`sources`) — **the source library does not require downloading media** and stores none; downloading is an optional future capability when a workflow genuinely needs it; exported vectors if ever needed (`embeddings`), per-asset-type media, per-project working files (`projects`), final MP4s (`renders`), scratch (`temporary`). The key naming convention (e.g. `images/<project_id>/<scene_id>/<asset_id>.png`) is *Decision pending*.
 
 The dev Docker-free Postgres helper also keeps its cluster in `data/temporary/pgdata` (ignored).
 
@@ -34,4 +34,4 @@ The dev Docker-free Postgres helper also keeps its cluster in `data/temporary/pg
 
 ## Limitations
 
-No quota, no orphan cleanup, no content-addressed dedup, no signed URLs, no serving endpoint — so neither the Studio Player nor the renderer can fetch a stored file today. `LocalStorage` is used by no route ([KI-9](../reference/status.md#known-issues-and-limitations), [KI-17](../reference/status.md#known-issues-and-limitations)). See [data-lifecycle](data-lifecycle.md), [security/file-security](../security/file-security.md), [operations/backups](../operations/backups.md).
+No quota, no orphan cleanup, no content-addressed dedup, no signed URLs, no serving endpoint — so neither the Studio Player nor the renderer can fetch a stored file today. `LocalStorage` is used by the transcript ingestion only ([KI-9](../reference/status.md#known-issues-and-limitations), partly resolved in P1; [KI-17](../reference/status.md#known-issues-and-limitations)); deleting a source removes its raw files, and a failed ingest removes the file it just wrote, but there is still no orphan sweep for other causes. See [data-lifecycle](data-lifecycle.md), [security/file-security](../security/file-security.md), [operations/backups](../operations/backups.md).

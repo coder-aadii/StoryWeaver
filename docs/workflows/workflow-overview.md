@@ -4,7 +4,7 @@
 
 ## Status
 
-**Partially implemented.** The execution abstraction (`WorkflowRunner`, `LocalRunner`) exists. **No concrete workflow function exists**, nothing in the API calls the runner, and Temporal is not wired. Every workflow doc in this folder describes **Target Architecture** unless it says otherwise.
+**Partially implemented.** The execution abstraction (`WorkflowRunner`, `LocalRunner`) exists and, since P1, runs two concrete workflows — `source.add` and `source.fetch_transcript` (Source Library) — as persisted `workflow_runs` ([ingestion workflow](ingestion-workflow.md)). **No other workflow function exists** (story, script, storyboard, assets, render, QA are Planned), and Temporal is not wired. Every workflow doc in this folder describes **Target Architecture** unless it says otherwise.
 
 ## Purpose
 

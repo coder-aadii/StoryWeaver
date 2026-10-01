@@ -4,7 +4,7 @@
 
 ## Status
 
-**Implemented (CRUD only).** `Project` and `ProjectSource` tables, project CRUD API and a UI list/create/detail page exist. There is no pipeline behind the statuses: the stages a project is supposed to move through are **Planned — not implemented**; the status enum is ready for them. (`ProjectSource` has no API endpoint.)
+**Implemented (CRUD only).** `Project` and `ProjectSource` tables, project CRUD API and a UI list/create/detail page exist. There is no pipeline behind the statuses: the stages a project is supposed to move through are **Planned — not implemented**; the status enum is ready for them. Since P1, projects can be linked to sources: `PUT/DELETE/GET /projects/{id}/sources[/{sid}]` (idempotent; only `imported` sources), the project page lists and edits the links, and sources report their usage (`usage_count`, `GET /sources/{id}/usage`).
 
 ## Purpose
 

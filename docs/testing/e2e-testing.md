@@ -4,7 +4,7 @@
 
 ## Status
 
-Implemented, minimal (counts: [testing strategy](testing-strategy.md#layers)).
+Implemented, small (counts: [testing strategy](testing-strategy.md#layers)).
 
 ## Setup
 
@@ -16,7 +16,11 @@ make e2e
 
 Browser: normally `pnpm --filter @storyweaver/web exec playwright install chromium`. Playwright does not support Ubuntu 20.04; set `PLAYWRIGHT_CHROMIUM_PATH` to any Chromium binary (on the dev machine, Remotion's `chrome-headless-shell` under `packages/video/node_modules/.remotion/` worked).
 
-## Covered (`e2e/navigation.spec.ts`)
+## Covered
+
+`e2e/sources.spec.ts` (P1): through the real UI and API, upload a transcript → it appears once → a keyword search finds it → uploading the same words again shows "already in your library". It uses the **upload path only** (no network, no yt-dlp) with a unique word per run so reruns do not collide. Precondition: the API running against a **disposable** database with the P1 migration applied (never a hosted one). Verified on the dev machine with the local Docker-free Postgres.
+
+`e2e/navigation.spec.ts`:
 
 1. `/` redirects to `/dashboard`; sidebar navigation to Projects works.
 2. `/studio` shows the Studio heading and the "Render path" card.

@@ -93,58 +93,16 @@ class ChannelRead(ReadModel):
     error: str | None
 
 
-# --- source videos
-class SourceVideoCreate(BaseModel):
-    channel_id: uuid.UUID | None = None
-    platform: str = Field(default="youtube", min_length=1, max_length=32)
-    external_id: str = Field(min_length=1, max_length=128)
-    url: str = Field(min_length=1, max_length=2048)
-    title: str = Field(min_length=1, max_length=1024)
-    description: str | None = Field(default=None, max_length=DESCRIPTION)
-    duration_seconds: float | None = Field(default=None, ge=0)
-    language: str | None = Field(default=None, max_length=16)
-
-    @model_validator(mode="after")
-    def _check_url(self) -> "SourceVideoCreate":
-        _validate_source_url(self.platform, self.url, ("video",))
-        return self
-
-
+# --- source videos (created via /sources/from-url or /sources/from-transcript; see source_api.py)
 class SourceVideoUpdate(_Patch):
+    """Editable fields only. Status, URL, identity and transcript are managed by the ingestion service."""
+
     nullable_fields = frozenset({"description"})
     title: str | None = Field(default=None, min_length=1, max_length=1024)
     description: str | None = Field(default=None, max_length=DESCRIPTION)
-    status: SourceStatus | None = None
 
 
-class SourceVideoRead(ReadModel):
-    channel_id: uuid.UUID | None
-    platform: str
-    external_id: str
-    url: str
-    title: str
-    description: str | None
-    duration_seconds: float | None
-    language: str | None
-    status: SourceStatus
-    error: str | None
-
-
-# --- transcripts
-class TranscriptCreate(BaseModel):
-    source_video_id: uuid.UUID
-    origin: str = Field(default="upload", min_length=1, max_length=32)
-    language: str | None = Field(default=None, max_length=16)
-    text: str | None = Field(default=None, max_length=TRANSCRIPT_TEXT)
-    segments: list[dict[str, Any]] = Field(default=[], max_length=100_000)
-
-
-class TranscriptUpdate(_Patch):
-    nullable_fields = frozenset({"text"})
-    status: TranscriptStatus | None = None
-    text: str | None = Field(default=None, max_length=TRANSCRIPT_TEXT)
-
-
+# --- transcripts (read-only here; written by the ingestion service)
 class TranscriptRead(ReadModel):
     source_video_id: uuid.UUID
     version: int

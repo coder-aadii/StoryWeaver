@@ -36,7 +36,7 @@ Key facts (verified in code):
 - **CRUD factory** (`api/crud.py`): `crud_router(model, create, update, read, prefix, tag)` generates list (limit 1–200, default 50, offset; newest first), get, create, patch (`exclude_unset`), delete. Failures raise `ApiError` with a stable `code`: missing id → 404 `not_found`; `IntegrityError` → 409 (`duplicate` / `invalid_reference` / `missing_value` / `conflict`, from the PostgreSQL SQLSTATE); `DataError` → 422 `invalid_value`. Domain errors are mapped by `api/errors.py` (`install_exception_handlers`). The factory needs a single UUID `id` and a `created_at` column. Used for 10 resource groups registered in `api/v1/router.py`. See [api/API-conventions](../api/API-conventions.md) and [errors](../api/errors.md).
 - **Health** (`api/v1/health.py`): `/health` (no dependencies), `/health/ready` (SELECT 1 + pgvector check, 503 if not ready), `/health/providers` (configuration booleans only). See [api/health-and-readiness](../api/health-and-readiness.md).
 - **Logging** (`core/logging.py`): structlog JSON; a key is masked as `***` only if its final word is a secret word (`api_key`, `password`, `authorization`, `token`/`access_token`, …), so `output_tokens` is kept; string values, including nested dicts/lists and exception text, are scrubbed for secret-shaped substrings (best-effort). See [operations/logging](../operations/logging.md).
-- **Errors** (`core/errors.py`): `StoryWeaverError` → `ProviderNotConfiguredError`, `ProviderError`, `UnsafePathError`, `InvalidSourceError`. These are **not yet mapped to HTTP responses** (no route raises them yet).
+- **Errors** (`core/errors.py`): `StoryWeaverError` → `ProviderNotConfiguredError`, `ProviderError` (`ProviderTimeoutError`, `ProviderResponseError`), `UnsafePathError`, `InvalidSourceError` (`UnsupportedSourceKindError`), `SourceUnavailableError`, `NoCaptionsError`, `TranscriptParseError`, `FileTooLargeError`. `api/errors.py` maps them to HTTP with a uniform `{detail, code}` body; the Source Library routes raise several of them ([errors](../api/errors.md)).
 
 ## Target architecture
 
@@ -51,7 +51,7 @@ flowchart LR
   W --> S
 ```
 
-Custom (non-CRUD) routes get their own router modules (e.g. channel scan, "generate script for project"), registered beside the CRUD loop. Exception handlers will map `StoryWeaverError` subclasses to HTTP statuses — **Planned — not implemented**.
+Custom (non-CRUD) routes get their own router modules registered **before** the CRUD loop (route order matters): implemented today are `api/v1/sources.py`, `runs.py` and `project_sources.py` (Source Library; logic in `ingestion/service.py` and `ingestion/queries.py`, routes stay thin). Planned: channel scan, "generate script for project". Exception handlers map `StoryWeaverError` subclasses to HTTP statuses (implemented, `api/errors.py`); the generic CRUD factory no longer serves `/sources` and serves `/transcripts` read-only.
 
 ## Components and responsibilities
 
@@ -62,7 +62,7 @@ Custom (non-CRUD) routes get their own router modules (e.g. channel scan, "gener
 
 ## Data flow
 
-Request → Pydantic validation → `get_db` session → model → commit → Pydantic response model (`from_attributes`). Async jobs: route → `get_runner().submit(name, fn, …)` → thread pool (target; no route does this yet).
+Request → Pydantic validation → `get_db` session → model → commit → Pydantic response model (`from_attributes`). Async jobs: route → create a queued `workflow_runs` row and commit → `get_runner().submit(kind, fn, run_id)` → thread pool, where the worker opens its own session and updates the run (implemented for `POST /sources/from-url` and `POST /sources/{id}/retry`).
 
 ## Failure modes
 
@@ -80,7 +80,7 @@ Request → Pydantic validation → `get_db` session → model → commit → Py
 - CRUD patch/create schemas are intentionally thin: e.g. a Project's `status` can be patched freely (no state machine), and no endpoint enforces cross-entity rules.
 - No list filtering, search or total counts ([api/pagination](../api/pagination.md)).
 - `Settings.embedding_dimensions` exists, but the DB column is fixed at 768 by the `EMBEDDING_DIM` constant; the two are independent and unchecked ([KI-6](../reference/status.md#known-issues-and-limitations)).
-- Remaining limitations: `LocalStorage` and `LocalRunner` are used by no route ([KI-9](../reference/status.md#known-issues-and-limitations)); no CI exists ([KI-10](../reference/status.md#known-issues-and-limitations)). Previously listed and resolved in P0: PATCH validation (KI-4), exception mapping (KI-8), readiness logging and connect timeout (KI-5).
+- Remaining limitations: no endpoint serves files from `data/` and there is no image/audio upload ([KI-9](../reference/status.md#known-issues-and-limitations), partly resolved in P1 — `LocalStorage` and `LocalRunner` are used by the Source Library ingestion); no CI exists ([KI-10](../reference/status.md#known-issues-and-limitations)). Previously listed and resolved in P0: PATCH validation (KI-4), exception mapping (KI-8), readiness logging and connect timeout (KI-5).
 
 ## Future evolution
 

@@ -10,17 +10,17 @@
 
 **Scenario:** A 30-minute documentary transcript contains three separable narrative opportunities.
 **Expected:** The system identifies independent opportunities (themes, conflicts, causal chains, turning points) and offers however many story candidates it can justify (one, several, or **none** if the source yields no suitable story), each with its own arc and hook — *not* three 10-minute slices, and not a fixed number. See [story-generation](../domains/story-generation.md).
-**Feasible today:** No. Only the `SourceVideo`/`Transcript` tables and the `Project`/`ProjectSource` join exist.
+**Feasible today:** Only the first step. Since P1 you can add the source (YouTube video or transcript), have it stored, chunked and searchable by keyword, and link it to a project; no analysis, opportunity detection or story candidates exist (Planned).
 
 ## UC-2 — Build a library from a channel
 
 **Scenario:** Enter `https://www.youtube.com/@SomeChannel/videos`, see the video count, import 25.
-**Feasible today:** URL classification and an extractor `list_videos` method exist (optional yt-dlp, untested live). No scan endpoint, no import workflow. See [channel-ingestion](../domains/channel-ingestion.md).
+**Feasible today:** No. Channel and playlist URLs are recognised and refused with a clear message (`422 unsupported_kind`); a single video from a channel can be added, which records the channel (canonical id) and links the video to it. An extractor `list_videos` method exists but nothing calls it: no scan endpoint, no import workflow, no sync. See [channel-ingestion](../domains/channel-ingestion.md).
 
 ## UC-3 — Find prior ideas
 
 **Scenario:** "Find all saved sources related to prehistoric human survival", "find unused ideas in History", "have I already generated a video around this concept?", "find relevant facts across 50 transcripts".
-**Feasible today:** No. Schema supports it (`transcript_chunks.embedding`, HNSW cosine index; nearest-neighbour query covered by a test) but no embeddings are generated and no search endpoint exists. See [rag-strategy](../ai/rag-strategy.md), [embeddings-and-vector-search](../data/embeddings-and-vector-search.md).
+**Feasible today:** Partly. **Keyword search** over stored transcripts works (`GET /sources/search`, with timestamps, "hide sources already used" and per-source search), and project-level usage is tracked ("which projects used this source"). Semantic search, "similar ideas" and idea-level reuse do not: the schema supports embeddings (`transcript_chunks.embedding`, HNSW cosine index; nearest-neighbour query covered by a test) but none are generated. See [rag-strategy](../ai/rag-strategy.md), [embeddings-and-vector-search](../data/embeddings-and-vector-search.md).
 
 ## UC-4 — Produce a 10–15 minute illustrated, narrated video
 

@@ -18,18 +18,19 @@ flowchart LR
 
 FastAPI + Postgres/pgvector + Alembic; 10 CRUD resource groups; health/readiness/providers; provider interfaces and thin adapters; local storage with traversal protection; `build_timeline`; Remotion `Basic` composition with verified sample render; Next.js shell; pytest/Vitest/Playwright; docs. Evidence in [reference/status.md](../reference/status.md).
 
-## Phase 1 — Single-source ingestion
+## Phase 1 — Single-source ingestion (done, P1 / Source Library V1, 2026-10-01)
 
-- Ingestion workflow for one YouTube video: metadata → subtitles/Whisper → normalise → store transcript with timed segments (whether raw and cleaned copies are stored separately is **Decision pending**). The extractor currently returns metadata only ([KI-15](../reference/status.md#known-issues-and-limitations)).
-- TXT/SRT/VTT upload (with the file-security rules in [file-security](../security/file-security.md)).
-- Persisted workflow/job status and errors (needed by everything after).
-- Docs: [ingestion-workflow](../workflows/ingestion-workflow.md), [transcript-pipeline](../domains/transcript-pipeline.md).
+- Ingestion workflow for one YouTube video: metadata → platform captions (manual, then automatic) → normalise → store the raw file as received plus cleaned text with timed segments → chunks → keyword-searchable. No Whisper fallback (an upload is the fallback). Verified live once for a manual-caption video; other paths by recorded fixtures.
+- TXT/SRT/VTT upload or paste, with the file-security rules in [file-security](../security/file-security.md); exact duplicate detection by identity and content fingerprint; transcript versions.
+- Persisted workflow/job status and errors (`workflow_runs`), manual retry, startup reconciliation.
+- Project-level source usage; the Source Library UI (add, list, search, detail, retry, delete).
+- Docs: [ingestion-workflow](../workflows/ingestion-workflow.md), [transcript-pipeline](../domains/transcript-pipeline.md), [source-library](../domains/source-library.md).
 
 ## Phase 2 — Library, channels and search
 
 - Channel/playlist scan → count → choose N → import workflow; incremental sync ([channel-sync-workflow](../workflows/channel-sync-workflow.md)).
-- Chunk + embed + store; semantic search endpoints; collection/project-source membership endpoints; topics.
-- Duplicate detection beyond `(platform, external_id)`; source usage tracking ([FR-S12](requirements.md)).
+- Embed chunks and add semantic/hybrid search (chunking and keyword search already exist); collection-membership endpoints; topics.
+- Near-duplicate detection (exact identity and content-fingerprint dedupe already exist); idea-level usage tracking beyond the project-level usage already implemented ([FR-S12](requirements.md)).
 
 ## Phase 3 — Understanding → story → script
 

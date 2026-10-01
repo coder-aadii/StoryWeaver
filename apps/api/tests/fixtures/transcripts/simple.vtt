@@ -1,0 +1,21 @@
+WEBVTT - demo
+
+NOTE this is a comment
+spanning two lines
+
+STYLE
+::cue { color: lime }
+
+intro
+00:00.000 --> 00:03.000 align:start position:0%
+Welcome to the show.
+
+00:00:03.000 --> 00:00:07.500
+Today we talk about <c.highlight>volcanoes</c>.
+
+00:00:07.500 --> 00:00:11.000
+They erupt
+without warning.
+
+00:00:11.000 --> 00:00:15.250
+Scientists <b>watch</b> them closely.

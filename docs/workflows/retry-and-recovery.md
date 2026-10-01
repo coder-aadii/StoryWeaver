@@ -4,7 +4,7 @@
 
 ## Status
 
-**Planned.** The *enablers* exist: `status` + `error` columns on core entities, immutable version tables, unique constraints, a runner-level error boundary and structured logs. **No retry logic, backoff, reconciliation or recovery tooling is implemented.**
+**Partially implemented (P1, 2026-10-01).** For the Source Library ingestion workflows these rules are real: persisted `workflow_runs` (one active run per `(kind, subject)`), idempotent steps, typed errors with a `retryable` flag, a manual retry endpoint (`POST /sources/{id}/retry`), transactional writes with cleanup, and startup reconciliation of work left by a dead process. **Not implemented:** automatic retry/backoff, cancellation, timeouts per run, a dead-letter queue, and any of this for the later pipeline stages (P2+).
 
 ## Design rules (Target)
 
@@ -17,14 +17,16 @@
 
 ## Idempotency keys
 
-> Canonical table. Other workflow documents link here instead of defining their own keys. **Target design** — no workflow code exists; the "Stored today" column says what the schema can actually record.
+> Canonical table. Other workflow documents link here instead of defining their own keys. Rows for the Source Library (first four) are **implemented**; the rest are **Target design** with no workflow code yet — the "Stored today" column says what the schema can actually record.
 
 | Operation (entity-keyed step) | Idempotency key | Stored today | Gap / note |
 | --- | --- | --- | --- |
-| `import_video(video_id)` | `(platform, external_id)` | Columns + unique constraint on `source_videos` | None for YouTube; uploads with no URL are not representable ([KI-14](../reference/status.md#known-issues-and-limitations)) |
+| `source.add` (YouTube video) | `(platform, external_id)` (11-char video id); run key `source.add:<source_id>:<attempt>`; at most one active run per `(kind, subject)` | Unique constraint on `source_videos`; `workflow_runs.idempotency_key` + partial unique index | Implemented. A second add returns the existing source and starts no run |
+| Transcript upload / paste | `(platform='upload', external_id = sha256 fingerprint)`; also any existing source with the same `fingerprint` | Unique constraint; `source_videos.fingerprint` (indexed) | Implemented. Identical content dedupes across SRT/VTT/TXT and across platforms; near-duplicates not detected (P12) |
+| Transcript version (`ingest_transcript`) | `(source_video_id, fingerprint, normalizer_version)` — same triple → return the current transcript | `transcripts.version`, `is_current` (partial unique), `normalizer_version`; `source_videos.fingerprint` | Implemented; created only by the service (resolved KI-13) |
+| `source.fetch_transcript` (retry of the transcript half) | `source.fetch_transcript:<source_id>:<attempt>`; one active run per `(kind, subject)` | `workflow_runs` | Implemented. Automatic retry/backoff: P2 |
 | `import_channel(channel)` | channel `(platform, external_id)` + per-video keys above | Unique constraint on `channels` | Channel `external_id` must be the canonical channel id, not the URL fragment ([KI-24](../reference/status.md#known-issues-and-limitations)); selected count/progress not stored |
-| `generate_transcript(video_id)` | `(source_video_id, version)` | `version` column + unique constraint; `origin`, `language` | API cannot set `version` ([KI-13](../reference/status.md#known-issues-and-limitations)) |
-| chunk transcript | `(transcript_id, chunk_index)` | Unique constraint on `transcript_chunks` | Replace-by-transcript in one transaction |
+| chunk transcript | `(transcript_id, chunk_index)` | Unique constraint on `transcript_chunks` | Implemented: written in the same transaction as the transcript version |
 | embed chunks | `(chunk, embedding_model)`; only rows with `embedding IS NULL` | `embedding`, `embedding_model` columns | Dimension fixed at 768 ([KI-6](../reference/status.md#known-issues-and-limitations)) |
 | analyse source | `(transcript_id, analysis_version, prompt_version, provider, model)` | **No table** | Storage Decision pending ([story data model](../data/story-data-model.md)); `prompt_version`/`provider`/`model` columns exist only on `script_versions` |
 | story candidates | `(analysis ref, prompt_version, provider, model, seed)` | **No storage** | Decision pending |
@@ -41,7 +43,7 @@ Rules: a key component that matters for the output **must** be recorded with the
 
 | Scenario | Target behaviour |
 | --- | --- |
-| Process restarts mid-job (`LocalRunner` is in-memory) | Startup sweep: entities stuck in `importing`/`processing`/`generating`/`rendering` older than a timeout are marked `failed` ("interrupted") and become retryable |
+| Process restarts mid-job (`LocalRunner` is in-memory) | **Implemented for ingestion** (`reconcile_stale` in the app startup hook, never blocks boot): active runs → `interrupted` (`error.code = interrupted`, retryable), sources stuck `importing` → `failed`, transcripts stuck `processing` → `failed`; then `POST /sources/{id}/retry`. Target for the later stages (`generating`/`rendering`) |
 | Provider down | Fail fast with clear error; optionally fall back per [../ai/model-routing.md](../ai/model-routing.md) |
 | One scene fails | Mark that scene/asset `failed`; render blocked until resolved or the user excludes it; others continue |
 | Bad output accepted by mistake | Version tables allow rollback: select an older `script_versions`/`scene_versions` row |
@@ -65,6 +67,6 @@ Per attempt: `workflow_id`, entity id, provider, model, duration, status, error 
 
 ## Current limitations
 
-No dead-letter queue, no manual "retry" API/button, no timeouts, no cancellation. Temporal would provide retries/timeouts natively ([workflow-overview.md](workflow-overview.md)); until then these rules are implemented in step code.
+No dead-letter queue, no automatic retry/backoff, no per-run timeouts, no cancellation. A manual retry exists only for the Source Library (`POST /sources/{id}/retry`, with a Retry button in the UI). Temporal would provide retries/timeouts natively ([workflow-overview.md](workflow-overview.md)); until then these rules are implemented in step code.
 
 See also [../architecture/workflow-architecture.md](../architecture/workflow-architecture.md), [../operations/recovery.md](../operations/recovery.md).

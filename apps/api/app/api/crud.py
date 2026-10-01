@@ -21,6 +21,7 @@ def crud_router(
     read: type[BaseModel],
     prefix: str,
     tag: str,
+    allow_delete: bool = True,
 ) -> APIRouter:
     router = APIRouter(prefix=prefix, tags=[tag])
 
@@ -82,10 +83,12 @@ def crud_router(
             commit(db)
             return obj
 
-    @router.delete("/{item_id}", status_code=status.HTTP_204_NO_CONTENT)
-    def delete_item(item_id: uuid.UUID, db: Session = Depends(get_db)) -> Response:
-        db.delete(get_or_404(db, item_id))
-        commit(db)
-        return Response(status_code=status.HTTP_204_NO_CONTENT)
+    if allow_delete:
+
+        @router.delete("/{item_id}", status_code=status.HTTP_204_NO_CONTENT)
+        def delete_item(item_id: uuid.UUID, db: Session = Depends(get_db)) -> Response:
+            db.delete(get_or_404(db, item_id))
+            commit(db)
+            return Response(status_code=status.HTTP_204_NO_CONTENT)
 
     return router

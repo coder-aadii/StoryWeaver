@@ -35,7 +35,7 @@ A **modular monolith** ([ADR-006](../decisions/ADR-006-modular-monolith.md)): on
 | `db/`, `models/` | Lazy sync SQLAlchemy engine/session; 17 tables; status enums | Implemented |
 | `schemas/` | Pydantic API models (`resources.py`), scene/timeline contract (`scene.py`), `NormalizedSource` (`source.py`) | Implemented |
 | `api/` | `/api/v1` router; generic CRUD factory; health endpoints | Implemented |
-| `ingestion/` | `SourceExtractor` interface, YouTube URL classification + optional yt-dlp extractor, `Transcriber` interface + lazy faster-whisper, transcript chunking | Partially implemented (extractor/transcriber never run against real services) |
+| `ingestion/` | `SourceExtractor` interface + registry, YouTube extractor (metadata + captions, optional yt-dlp), parsers, normalizer/fingerprint, chunking, ingestion service and queries (search, usage); `Transcriber` interface + lazy faster-whisper (unwired) | Implemented for the Source Library V1 path (one recorded live run); the transcriber is unwired |
 | `intelligence/` | `LLMProvider`/`EmbeddingProvider` interfaces, five LLM adapters, two embedding adapters, lazy registry | Partially implemented (only Ollama's chat request shape is test-covered; embedding adapters are untested) |
 | `visual/` | `ImageGenerator` interface, mock generator, ComfyUI **stub** | Partially implemented |
 | `voice/` | `VoiceProvider` interface; default provider always raises "not configured" | Partially implemented |

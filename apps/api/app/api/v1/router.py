@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 
 from app.api.crud import crud_router
-from app.api.v1 import health
+from app.api.v1 import health, project_sources, runs, sources
 from app.models import (
     Asset,
     Channel,
@@ -10,7 +10,6 @@ from app.models import (
     Render,
     Scene,
     Script,
-    SourceVideo,
     Topic,
     Transcript,
 )
@@ -18,11 +17,14 @@ from app.schemas import resources as r
 
 api_router = APIRouter(prefix="/api/v1")
 api_router.include_router(health.router)
+# Service-backed routers are registered BEFORE the generic CRUD ones (route order matters).
+api_router.include_router(sources.router)
+api_router.include_router(runs.router)
+api_router.include_router(project_sources.router)
 
 for _model, _create, _update, _read, _prefix, _tag in [
     (Channel, r.ChannelCreate, r.ChannelUpdate, r.ChannelRead, "/channels", "channels"),
-    (SourceVideo, r.SourceVideoCreate, r.SourceVideoUpdate, r.SourceVideoRead, "/sources", "sources"),
-    (Transcript, r.TranscriptCreate, r.TranscriptUpdate, r.TranscriptRead, "/transcripts", "transcripts"),
+    (Transcript, None, None, r.TranscriptRead, "/transcripts", "transcripts"),  # read-only: ingestion owns writes
     (Topic, r.TopicCreate, r.TopicUpdate, r.TopicRead, "/topics", "topics"),
     (Collection, r.CollectionCreate, r.CollectionUpdate, r.CollectionRead, "/collections", "collections"),
     (Project, r.ProjectCreate, r.ProjectUpdate, r.ProjectRead, "/projects", "projects"),
@@ -33,6 +35,12 @@ for _model, _create, _update, _read, _prefix, _tag in [
 ]:  # fmt: skip
     api_router.include_router(
         crud_router(
-            model=_model, create=_create, update=_update, read=_read, prefix=_prefix, tag=_tag
+            model=_model,
+            create=_create,
+            update=_update,
+            read=_read,
+            prefix=_prefix,
+            tag=_tag,
+            allow_delete=_model is not Transcript,
         )
     )

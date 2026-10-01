@@ -4,7 +4,7 @@
 
 ## Status
 
-**Partially implemented.** In the diagram below only the **solid** edges are runtime relationships that work today (`UI → ROUTES → DB`). **Dashed** edges are either *exists, not wired* (code exists but nothing calls it) or *planned / stub* (not functional). Nothing dashed should be read as an implemented runtime dependency.
+**Partially implemented.** In the diagram below only the **solid** edges are runtime relationships that work today: the UI, routes and database, and (since P1) the Source Library path `ROUTES → ING → YT` (optional yt-dlp), `ING → FS` (raw transcripts), `ING → WF` (persisted runs on the local runner). **Dashed** edges are either *exists, not wired* (code exists but nothing calls it) or *planned / stub* (not functional). Nothing dashed should be read as an implemented runtime dependency.
 
 ## Purpose
 
@@ -32,7 +32,7 @@ flowchart TB
     PLAYER[Remotion Player<br/>preview]
   end
   subgraph API[FastAPI modular monolith · apps/api]
-    ROUTES[api/v1 routes<br/>CRUD + health]
+    ROUTES[api/v1 routes<br/>CRUD · health · Source Library]
     ING[ingestion]
     INTEL[intelligence]
     STORY[story]
@@ -59,7 +59,11 @@ flowchart TB
   UI --> ROUTES
   PLAYER -. "sample timeline only" .-> UI
   ROUTES --> DB
-  ING -. "exists, not wired" .-> YT
+  ROUTES --> ING
+  ING --> DB
+  ING --> YT
+  ING --> WF
+  ING --> FS
   ING -. "exists, not wired" .-> WHISPER
   INTEL -. "exists, not wired" .-> OLL
   INTEL -. "exists, not wired" .-> CLOUD
@@ -67,12 +71,10 @@ flowchart TB
   VOICE -. "planned" .-> TTS
   VIDEO -. "planned" .-> RENDER
   WF -. "planned" .-> TEMP
-  CORE -. "exists, not wired" .-> FS
   RENDER -. "planned: reads assets" .-> FS
-  ROUTES -. "exists, not wired" .-> WF
 ```
 
-Legend. **Solid** (works today): `UI → ROUTES` (fetch) and `ROUTES → DB` (generic CRUD). **Dashed "exists, not wired"**: the code is present and unit-tested in isolation, but no route, workflow or job calls it — `ROUTES → WF` (no route submits to the runner), `CORE → FS` (`LocalStorage` is used by no route), `INTEL → providers` (adapters never called by a workflow; only the Ollama HTTP shape is test-covered), `ING → yt-dlp / faster-whisper` (lazy optional imports; never run against real services). **Dashed "stub"/"planned"**: not functional. The Remotion Player on `/studio` renders only the bundled sample timeline; the `PLAYER` node is not driven by project data.
+Legend. **Solid** (works today): `UI → ROUTES` (fetch), `ROUTES → DB` (CRUD and Source Library queries), `ROUTES → ING` (add/retry/search), `ING → YT` (yt-dlp is an optional extra; verified by one recorded live run on 2026-10-01, otherwise by recorded fixtures), `ING → WF` (`source.add` / `source.fetch_transcript` runs persisted in `workflow_runs`, executed by `LocalRunner`) and `ING → FS` (raw transcripts via `LocalStorage`). **Dashed "exists, not wired"**: the code is present and unit-tested in isolation, but nothing calls it — `INTEL → providers` (adapters never called by a workflow; only the Ollama HTTP shape is test-covered), `ING → faster-whisper` (lazy optional import; no audio is fetched). **Dashed "stub"/"planned"**: not functional. The Remotion Player on `/studio` renders only the bundled sample timeline; the `PLAYER` node is not driven by project data.
 
 ## Components
 

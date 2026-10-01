@@ -4,7 +4,7 @@
 
 ## Status
 
-**Implemented** as plain CRUD. Channel scanning, counting and import are **Planned — not implemented** ([domains/channel-ingestion](../../domains/channel-ingestion.md)); the API only stores records you send.
+**Implemented** as plain CRUD. Since P1, channel rows are also created automatically when a single video is added (`POST /sources/from-url`): the service upserts the channel by its canonical `UC…` id and links the video; those rows show up here and as `channel_title` on sources. Channel scanning, counting and import are **Planned — not implemented** ([domains/channel-ingestion](../../domains/channel-ingestion.md)); `video_count` is never populated and a channel/playlist URL given to `from-url` is refused with `422 unsupported_kind`.
 
 Base: `/api/v1/channels` · table: [database-schema](../../data/database-schema.md#channels) · conventions: [API-conventions](../API-conventions.md)
 

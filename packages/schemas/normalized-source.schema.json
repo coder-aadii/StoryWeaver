@@ -1,16 +1,33 @@
 {
   "$defs": {
     "TranscriptSegment": {
+      "description": "One timed (or untimed) piece of transcript text.\n\n`start`/`end` are None for untimed sources such as plain .txt — times are never fabricated.",
       "properties": {
         "start": {
-          "minimum": 0,
-          "title": "Start",
-          "type": "number"
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Start"
         },
         "end": {
-          "minimum": 0,
-          "title": "End",
-          "type": "number"
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "End"
         },
         "text": {
           "title": "Text",
@@ -30,8 +47,6 @@
         }
       },
       "required": [
-        "start",
-        "end",
         "text"
       ],
       "title": "TranscriptSegment",
@@ -139,6 +154,30 @@
       ],
       "default": null,
       "title": "Channel Title"
+    },
+    "channel_url": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Channel Url"
+    },
+    "thumbnail_url": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Thumbnail Url"
     },
     "segments": {
       "default": [],

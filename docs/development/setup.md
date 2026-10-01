@@ -23,7 +23,7 @@ make setup          # uv sync (apps/api) + pnpm install + copies .env.example to
 
 (If you prefer to copy the file yourself, `cp .env.example .env` is equivalent to that last step.) The shipped `.env.example` has the optional application variables (`ENVIRONMENT`, `LOG_LEVEL`, `MAX_UPLOAD_BYTES`, `CORS_ORIGINS`) commented out with their defaults and no longer sets `STORAGE_ROOT` (an empty value now means unset anyway). For the web app, copy `apps/web/.env.example` to `apps/web/.env.local` only if the API is not at `http://localhost:8000`; see the [environment reference](../reference/environment-reference.md).
 
-Optional extras (not needed to boot): `cd apps/api && uv sync --extra ingestion` (yt-dlp), `--extra transcription` (faster-whisper).
+Optional extras (not needed to boot or to run the tests): `cd apps/api && uv sync --extra ingestion` (**yt-dlp — required only to add a YouTube video by URL**; without it `POST /sources/from-url` returns `409 provider_not_configured` with this install hint, while transcript upload/paste works), `--extra transcription` (faster-whisper; not wired to anything yet). If your database was created before P1 (including a hosted one), run `make db-migrate` before starting the API.
 
 ## 3. Database
 

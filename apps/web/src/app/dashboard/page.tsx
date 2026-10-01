@@ -15,10 +15,15 @@ const STATS = [
   { label: "Collections", path: "/collections", href: "/collections" },
 ];
 
+/** List endpoints return either a bare array or a { total } page. */
+function countOf(data: unknown[] | { total: number }): number {
+  return Array.isArray(data) ? data.length : data.total;
+}
+
 function Stat({ label, path, href }: (typeof STATS)[number]) {
   const { data, isPending, isError } = useQuery({
     queryKey: [path],
-    queryFn: () => api<unknown[]>(path),
+    queryFn: () => api<unknown[] | { total: number }>(path),
   });
   return (
     <Link href={href}>
@@ -26,7 +31,7 @@ function Stat({ label, path, href }: (typeof STATS)[number]) {
         <CardHeader>
           <CardDescription>{label}</CardDescription>
           <CardTitle className="text-3xl">
-            {isPending ? <Skeleton className="h-9 w-12" /> : isError ? "—" : data.length}
+            {isPending ? <Skeleton className="h-9 w-12" /> : isError ? "—" : countOf(data)}
           </CardTitle>
         </CardHeader>
       </Card>

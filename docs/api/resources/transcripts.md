@@ -1,31 +1,32 @@
 # Transcripts API
 
-> CRUD for `transcripts` of a source video.
+> Read-only access to transcript rows. Transcripts are created by the ingestion service, never by the API client.
 
 ## Status
 
-**Implemented** as plain CRUD for transcript rows. Transcript extraction/transcription workflows, cleaning and chunking persistence are **Planned — not implemented**; there is no API for `transcript_chunks`.
+**Implemented, read-only (P1, 2026-10-01).** `GET /transcripts` and `GET /transcripts/{id}` remain from the generic CRUD; `POST`, `PATCH` and `DELETE` were **removed** ([KI-13](../../reference/status.md#known-issues-and-limitations), resolved): versions are created by the service, so a client can no longer insert unvalidated segments or a conflicting `version`. Transcript *content* is read through the source routes below.
 
 Base: `/api/v1/transcripts` · table: [database-schema](../../data/database-schema.md#transcripts)
 
-## Create — `POST /transcripts` → 201
-Required: `source_video_id` (unknown → 409). Optional: `origin` (default `upload`), `language`, `text`, `segments` (list of objects, stored as JSONB; **not validated** as `TranscriptSegment`). The server sets `version=1` and `status=pending`; a second transcript for the same video therefore returns **409** (version cannot be supplied; `unique(source_video_id, version)`). Transcript versioning is a **target**, not current API behavior ([KI-13](../../reference/status.md#known-issues-and-limitations)); multi-version support through the API: *Decision pending*. `origin` is free text: the API schema defaults it to `upload`, the database default is `unknown` (rows inserted outside the API get `unknown`). The model holds a single `text` plus `segments`; a raw-vs-cleaned split and any raw file location are *Decision pending* (no storage column exists).
+## Endpoints
 
-## Read model
-`id, created_at, updated_at, source_video_id, version, status, origin, language, text, error`. `segments` are stored but **not returned**, and because `TranscriptUpdate` allows only `status` and `text`, `segments` **cannot be modified after creation** through the API.
+| Endpoint | Purpose |
+| --- | --- |
+| `GET /transcripts?limit=&offset=` | List rows (all versions of all sources) |
+| `GET /transcripts/{id}` | One row |
+| `POST` / `PATCH` / `DELETE /transcripts…` | **`405`** — not available |
+| `GET /sources/{id}/transcript` | The source's **current** transcript: summary, cleaned `text`, paged `segments` ([sources API](source-videos.md)) |
+| `GET /sources/{id}/chunks` | Its chunks (with timestamps) |
+| `POST /sources/{id}/transcript` | Attach or replace (a new version) via upload/paste |
 
-## Update — `PATCH /transcripts/{id}`
-Allowed: `status` (`pending|processing|ready|failed`), `text`.
+## Read model (`GET /transcripts/{id}`)
 
-## Other
-List/get/delete standard. Deleting removes chunks.
+`id, created_at, updated_at, source_video_id, version, status (pending|processing|ready|failed), origin, language, text, error`. `segments`, the raw-file key and `normalizer_version` are not in this model; use `GET /sources/{id}/transcript` (`TranscriptSummary` adds `segment_count, char_count, timed, normalizer_version`). `origin` is `manual` / `auto` (platform captions) or `upload`; `unknown` appears only on failed placeholder rows (e.g. `no_captions`).
+
+## Behaviour
+
+- Exactly one version per source is current (`is_current`); older versions stay as history with their chunks but are not searchable.
+- `timed` is `false` for plain `.txt` transcripts: `segments[].start/end` are `null`, and chunk times are `null`.
+- A failed current transcript is visible (`status: failed`, `error: "no_captions: …"`) so the UI can offer an upload; it never replaces a ready one.
 
 Related: [transcript-pipeline](../../domains/transcript-pipeline.md) · [source-data-model](../../data/source-data-model.md) · [embeddings-and-vector-search](../../data/embeddings-and-vector-search.md)
-
-Example create body and response (`201`):
-```json
-{"source_video_id":"7d4e…","origin":"upload","language":"en","text":"Long ago the ice reached the sea.","segments":[{"start":0,"end":3.1,"text":"Long ago the ice reached the sea."}]}
-```
-```json
-{"id":"c2a9…","created_at":"…","updated_at":"…","source_video_id":"7d4e…","version":1,"status":"pending","origin":"upload","language":"en","text":"Long ago the ice reached the sea.","error":null}
-```

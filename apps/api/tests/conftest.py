@@ -95,3 +95,35 @@ def client(db: Session) -> Iterator[TestClient]:
 def plain_client() -> TestClient:
     """Client with no database — proves optional infra never blocks the app."""
     return TestClient(app)
+
+
+# --- Source Library fixtures -----------------------------------------------------------------------
+@pytest.fixture
+def storage_root(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
+    """Point LocalStorage at a throwaway directory (nothing is written under the repo's data/)."""
+    root = tmp_path / "storage"
+    monkeypatch.setenv("STORAGE_ROOT", str(root))
+    get_settings.cache_clear()
+    return root
+
+
+@pytest.fixture
+def api(engine, db: Session, storage_root: Path) -> Iterator[TestClient]:  # type: ignore[no-untyped-def]
+    """A client whose requests each get their own session (like production), background work runs
+    inline, and storage is a temp dir. `db` is requested for its TRUNCATE-on-teardown cleanup."""
+    from app.workflows.runner import InlineRunner, set_runner
+
+    factory = sessionmaker(bind=engine, expire_on_commit=False)
+
+    def per_request_session() -> Iterator[Session]:
+        with factory() as session:
+            yield session
+
+    app.dependency_overrides[get_db] = per_request_session
+    set_runner(InlineRunner())
+    try:
+        yield TestClient(app)
+    finally:
+        set_runner(None)
+        app.dependency_overrides.clear()
+        get_settings.cache_clear()

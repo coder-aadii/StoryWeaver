@@ -111,14 +111,14 @@ The conceptual pipeline is *not* the build order. Build order is driven by what 
 
 ## Progress tracker
 
-> Live execution status. Update a row only when its acceptance criterion passes (test or command), never on intent. `☑` done · `◐` in progress · `☐` not started. Last updated: 2026-10-01 (P0 complete; P1 not started).
+> Live execution status. Update a row only when its acceptance criterion passes (test or command), never on intent. `☑` done · `◐` in progress · `☐` not started. Last updated: 2026-10-01 (P0 and P1 complete; P2 not started).
 
 ### Phase roll-up
 
 | Phase | Capability | Checkpoint | Tasks done | Status |
 | --- | --- | --- | --- | --- |
 | P0 | Foundation hardening | A | 9 / 9 | ☑ Done |
-| P1 | Source Library V1 | B | 0 / 16 | ☐ Not started |
+| P1 | Source Library V1 | B | 16 / 16 | ☑ Done |
 | P2 | Intelligence runtime | C0 | 0 / 13 | ☐ Not started |
 | P3 | Source understanding | C | 0 / 11 | ☐ Not started |
 | P4 | Story candidates, approval, architecture | D | 0 / 10 | ☐ Not started |
@@ -149,6 +149,24 @@ The conceptual pipeline is *not* the build order. Build order is driven by what 
 | ☑ | Dev servers bind to 127.0.0.1; web env documented (KI-20, KI-21) | `ss -ltn` shows 127.0.0.1 only; Playwright green |
 | ☑ | `make lint` clean, `make test` green with DB tests actually run (232 pytest, 7 + 14 Vitest; 2 Playwright e2e), status.md known-issues table reconciled | P0-T9; full run repeated after the docs sweep |
 
+### Checkpoint B — Source Library V1 usable (P1 exit criteria)
+
+| Done | Criterion | How verified |
+| --- | --- | --- |
+| ☑ | `make lint` clean; `make test` green with DB tests run; `make e2e` green for the new spec; migration up/down/up + `alembic check` clean | 505 pytest, 87 + 14 Vitest, 3 Playwright; `tests/test_migrations.py` |
+| ☑ | Same YouTube URL twice (fake extractor) → one source, one transcript version, second call `already_exists` | `test_adding_the_same_url_again_is_a_no_op` |
+| ☑ | TXT, SRT and VTT with the same words → one source; changed text → version 2 and `is_current` flips | `test_same_words_as_txt_srt_and_vtt_are_one_source`, `test_changed_transcript_text_becomes_version_two` |
+| ☑ | Search finds the source with a highlighted snippet and timestamp; failed transcript is listed but not searchable | `test_search_finds_highlights_and_locates_hits`, `test_no_captions_source_is_listed_but_not_searchable…` |
+| ☑ | No captions → source `imported`, transcript `failed (no_captions)`, UI offers upload; attach fills the same source | API + Vitest tests |
+| ☑ | Failure injection leaves no orphan chunks/raw file; `retry` completes it | `test_database_failure_rolls_back_chunks_and_removes_the_raw_file`, retry tests |
+| ☑ | Restart leaves nothing stuck `importing`/`running` | `test_app_startup_interrupts_work_left_by_a_dead_process` |
+| ☑ | Project link idempotent; usage lists it; `exclude_used` omits it; deleting a used source → 409 | `test_project_link_is_idempotent…`, `test_delete_removes_source_but_not_when_used` |
+| ☑ | No media stored; only the caption file is fetched, from allow-listed hosts | `test_no_media_is_stored_only_the_raw_caption_file`, 69 caption tests; live check stored a 918-byte `raw.json3` |
+| ☑ | Security: traversal filenames, oversize 413, non-UTF-8 422, foreign-host / `file://` URLs rejected | `test_hostile_filenames_…`, `test_oversize_upload_…`, URL tests |
+| ☑ | UI states reachable and tested; no console errors in e2e | 87 Vitest tests; Playwright; screenshots reviewed |
+| ☑ | Live YouTube check performed once and recorded honestly | 2026-10-01, one real video, manual English captions; automatic-caption and long videos **not** verified |
+| ☑ | `status.md` and the listed docs reflect reality | ~50 docs updated; links, anchors and headers verified |
+
 ### Task tracker
 
 #### P0 — Foundation hardening (Checkpoint A)
@@ -173,22 +191,22 @@ Detail: [02-source-library.md](02-source-library.md)
 
 | Done | ID | Task | Status | Notes |
 | --- | --- | --- | --- | --- |
-| ☐ | P1-T1 | Verify prerequisites (P0 closed KI-1, KI-8) | Not started |  |
-| ☐ | P1-T2 | Schemas and parsers (TXT/SRT/VTT, optional timing) | Not started |  |
-| ☐ | P1-T3 | Extractor captions without media download (KI-15) | Not started |  |
-| ☐ | P1-T4 | Normalizer and fingerprint; validated SourceVideoUpdate | Not started |  |
-| ☐ | P1-T5 | Migration and models (D5/D6, run table) | Not started |  |
-| ☐ | P1-T6 | Ingestion service (raw file via LocalStorage, chunks, dedupe) | Not started |  |
-| ☐ | P1-T7 | Run service and URL flow | Not started |  |
-| ☐ | P1-T8 | Startup reconciliation of stale runs | Not started |  |
-| ☐ | P1-T9 | Source and run routes (add / upload / get) | Not started |  |
-| ☐ | P1-T10 | Search (Postgres full-text) and usage | Not started |  |
-| ☐ | P1-T11 | Thumbnail and metadata mapping | Not started |  |
-| ☐ | P1-T12 | Frontend foundation (api client, shadcn components) | Not started |  |
-| ☐ | P1-T13 | Add-source flow (URL / upload dialog, run polling) | Not started |  |
-| ☐ | P1-T14 | List, detail, search and usage UI | Not started |  |
-| ☐ | P1-T15 | Playwright E2E for the Source Library | Not started |  |
-| ☐ | P1-T16 | Live check (one recorded real YouTube run) and docs | Not started |  |
+| ☑ | P1-T1 | Verify prerequisites (P0 closed KI-1, KI-8) | Done | P0 had closed KI-1/8/11/19; verified by the P0 tests |
+| ☑ | P1-T2 | Schemas and parsers (TXT/SRT/VTT, optional timing) | Done | `parsers.py` (SRT/VTT/json3/TXT, line-numbered errors, size cap, BOM/UTF-8), optional segment times, `chunk_segments` tolerates `None`; 79 tests |
+| ☑ | P1-T3 | Extractor captions without media download (KI-15) | Done | `fetch_transcript` (manual→auto, json3→vtt, HLS auto-captions, host allow-list, size cap), `identify`, `ensure_available`, `registry.py`; recorded real fixtures; 105 tests |
+| ☑ | P1-T4 | Normalizer and fingerprint; validated SourceVideoUpdate | Done | `normalize.py` (NORMALIZER_VERSION 2, idempotent) + format-insensitive fingerprint; `SourceVideoUpdate` has no `status` |
+| ☑ | P1-T5 | Migration and models (D5/D6, run table) | Done | migration `e39be38b3620` (up/down/up + `alembic check` clean): source identity, transcript versions/raw file, `search_vector` + GIN, `workflow_runs` |
+| ☑ | P1-T6 | Ingestion service (raw file via LocalStorage, chunks, dedupe) | Done | `ingestion/service.py`: versioned ingest, fingerprint dedupe, transactional chunk replace, raw file cleanup on failure |
+| ☑ | P1-T7 | Run service and URL flow | Done | `workflows/runs.py` `RunService` + `source.add` / `source.fetch_transcript` worker, `InlineRunner` for tests; failures persist `{code, message, retryable}` |
+| ☑ | P1-T8 | Startup reconciliation of stale runs | Done | `reconcile_stale` + lifespan hook (never blocks boot); tested incl. app startup |
+| ☑ | P1-T9 | Source and run routes (add / upload / get) | Done | `api/v1/sources.py`, `runs.py`, `project_sources.py`; raw create/patch routes removed; `python-multipart`; plus `POST /sources/{id}/transcript` (attach) |
+| ☑ | P1-T10 | Search (Postgres full-text) and usage | Done | Postgres full-text (`simple`), `ts_headline` snippets HTML-escaped, `exclude_used`, `source_id`, usage + project links |
+| ☑ | P1-T11 | Thumbnail and metadata mapping | Done | thumbnail, duration, published_at, language, canonical channel id upsert, whitelisted extras |
+| ☑ | P1-T12 | Frontend foundation (api client, shadcn components) | Done | `api.ts` FormData + `detail`/`code`, `sources-api.ts`, shadcn dialog/tabs/input/textarea/label |
+| ☑ | P1-T13 | Add-source flow (URL / upload dialog, run polling) | Done | add-source dialog (URL / upload-paste, attach mode), `use-run` polling, duplicate notice |
+| ☑ | P1-T14 | List, detail, search and usage UI | Done | list + search + detail + usage + delete + project links; safe `<mark>` renderer; 87 Vitest tests |
+| ☑ | P1-T15 | Playwright E2E for the Source Library | Done | `e2e/sources.spec.ts` green against the local test API (upload → search → duplicate notice) |
+| ☑ | P1-T16 | Live check (one recorded real YouTube run) and docs | Done | live check recorded (2026-10-01, one real video, manual English captions, 6 segments, searchable, 918-byte caption file only, no media); ~50 docs updated; KI-12/13/14/15/23/24 closed, KI-9/22 partly; KI-27 found and fixed (normalizer v2)
 
 #### P2 — Intelligence runtime (Checkpoint C0)
 
@@ -397,22 +415,22 @@ Open/closed state of the code defects in [status.md](../docs/reference/status.md
 | ◐ | KI-6 | P0-T2 (guard test) / P11 | guard test only; the setting is still read by no code |
 | ☑ | KI-7 | P0-T6 | resolved P0; remaining: Python fps/width/height positivity |
 | ☑ | KI-8 | P0-T5 | resolved P0 |
-| ☐ | KI-9 | P1 / P2 |  |
+| ◐ | KI-9 | P1 / P2 | `LocalStorage`/`LocalRunner` now used (P1); no file-serving route yet (P6) |
 | ☐ | KI-10 | P10 |  |
 | ☑ | KI-11 | P0-T1 | resolved P0 |
 | ☑ | KI-12 | P0-T5 / P1 | create endpoints validated in P0; P1 replaces the raw routes |
-| ☐ | KI-13 | P1 |  |
-| ☐ | KI-14 | P1 |  |
-| ☐ | KI-15 | P1 |  |
+| ☑ | KI-13 | P1 | resolved P1 |
+| ☑ | KI-14 | P1 | resolved P1 |
+| ☑ | KI-15 | P1 | resolved P1 |
 | ☐ | KI-16 | P7 |  |
 | ◐ | KI-17 | P0-T7 / P6 / P8 | decision made (ADR-009); implementation in P6/P8 |
 | ☐ | KI-18 | P6 |  |
 | ☑ | KI-19 | P0-T1 | resolved P0 |
 | ☑ | KI-20 | P0-T8 | resolved P0 |
 | ☑ | KI-21 | P0-T8 | resolved P0 |
-| ☐ | KI-22 | P1 / P2 / P4 |  |
-| ☐ | KI-23 | P1 / P11 |  |
-| ☐ | KI-24 | P11 |  |
+| ◐ | KI-22 | P1 / P2 / P4 | project-level source usage done (P1); candidates/analysis storage in P2–P4 |
+| ◐ | KI-23 | P1 / P11 | thumbnail done in P1; sync cursor remains for P11 |
+| ◐ | KI-24 | P11 | fixed for single-video imports in P1 (canonical channel id); channel import is P11 |
 | ☐ | KI-25 | P10 |  |
 | ☑ | KI-26 | P0-T2 / P0-T9 | resolved P0 (`.env.example` + root README) |
 

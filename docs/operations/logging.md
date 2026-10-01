@@ -19,6 +19,9 @@ Events emitted today:
 | `llm.generated` | `LLMProvider.generate` | `provider`, `model`, `duration`, `output_tokens`, `status`. Token counts are logged as numbers (previously masked — KI-2, resolved in P0); nothing persists them yet |
 | `llm.failed` | same | `provider`, `model`, `error` (exception class only) |
 | `workflow.started/finished/failed` | `LocalRunner` | `workflow_id`, `workflow`, `status`, `error` |
+| `source.add.started/finished/failed` | ingestion worker | `workflow_id` (= run id), `source_id`, `platform`, `status`, `chunk_count`, `duration`, `error_code`, `error` (exception type only). Transcript text and captions are never logged |
+| `search.executed` | `GET /sources/search` | `query_length`, `hit_count`, `duration`, `status` — the query text itself is not logged |
+| `startup.reconciled` / `startup.reconcile_skipped` | app startup | counts of interrupted runs/sources/transcripts, or the error type if the database was unavailable (startup continues) |
 
 ## Rules
 

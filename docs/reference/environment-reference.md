@@ -17,6 +17,8 @@ Settings are read from the process environment, then `<repo>/.env`. Names are ca
 | `ENVIRONMENT` | `development` | Label only |
 | `LOG_LEVEL` | `INFO` | Structured log level |
 | `CORS_ORIGINS` | `["http://localhost:3000","http://localhost:3100","http://127.0.0.1:3100"]` | JSON list of allowed browser origins |
+| `MAX_TRANSCRIPT_BYTES` | 5242880 (5 MB) | Largest transcript upload or caption file accepted (413 `file_too_large` / `transcript_too_large`); independent of `MAX_UPLOAD_BYTES` |
+| `CAPTION_LANGUAGES` | `["en"]` (JSON list) | Caption language preference order for YouTube; exact match first, then prefix (`en` → `en-US`) |
 | `LLM_TIMEOUT_SECONDS` | 120 | HTTP timeout for every provider call (LLM and embeddings); a timeout raises `ProviderTimeoutError` |
 | `DB_CONNECT_TIMEOUT_SECONDS` | 10 | Database connect timeout (1–120); bounds how long an unreachable host can stall a request or `/health/ready` |
 | `STORYWEAVER_ALLOW_DESTRUCTIVE_TESTS` | unset | Tests only: set to `1` to allow a `TEST_DATABASE_URL` whose name does not end in `_test` (never the application database) |

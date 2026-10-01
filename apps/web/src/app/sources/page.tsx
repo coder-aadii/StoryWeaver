@@ -14,7 +14,10 @@ export default function SourcesPage() {
           <Card className="hover:bg-accent/40">
             <CardHeader>
               <CardTitle>Channels</CardTitle>
-              <CardDescription>Imported YouTube channels and their video counts.</CardDescription>
+              <CardDescription>
+                Imported YouTube channels and their video counts — channel import arrives in a later
+                release.
+              </CardDescription>
             </CardHeader>
           </Card>
         </Link>
@@ -22,7 +25,9 @@ export default function SourcesPage() {
           <Card className="hover:bg-accent/40">
             <CardHeader>
               <CardTitle>Videos</CardTitle>
-              <CardDescription>Individual source videos and transcript status.</CardDescription>
+              <CardDescription>
+                Add YouTube videos or transcripts, search them, and see where they are used.
+              </CardDescription>
             </CardHeader>
           </Card>
         </Link>

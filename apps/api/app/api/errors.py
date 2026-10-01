@@ -10,12 +10,16 @@ from fastapi.responses import JSONResponse
 from app.core.errors import (
     FileTooLargeError,
     InvalidSourceError,
+    NoCaptionsError,
     ProviderError,
     ProviderNotConfiguredError,
     ProviderResponseError,
     ProviderTimeoutError,
+    SourceUnavailableError,
     StoryWeaverError,
+    TranscriptParseError,
     UnsafePathError,
+    UnsupportedSourceKindError,
 )
 from app.core.logging import get_logger
 
@@ -30,8 +34,12 @@ class ApiError(StoryWeaverError):
 
 # Most specific first; the first isinstance match wins.
 _MAPPING: list[tuple[type[StoryWeaverError], int, str]] = [
+    (UnsupportedSourceKindError, 422, "unsupported_kind"),
     (InvalidSourceError, 422, "invalid_source"),
     (UnsafePathError, 400, "unsafe_path"),
+    (TranscriptParseError, 422, "transcript_parse_error"),
+    (NoCaptionsError, 404, "no_captions"),
+    (SourceUnavailableError, 404, "video_unavailable"),
     (FileTooLargeError, 413, "file_too_large"),
     (ProviderNotConfiguredError, 409, "provider_not_configured"),
     (ProviderTimeoutError, 504, "provider_timeout"),

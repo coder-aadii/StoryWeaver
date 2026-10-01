@@ -14,14 +14,18 @@
 
 ## F1 — Add a single YouTube video
 
-1. ⬜ User pastes a URL in Sources.
-2. 🟡 System validates and classifies it (video / channel / playlist) — `classify_youtube_url`.
-3. ⬜ Metadata fetched via yt-dlp (optional extra; not exercised live).
-4. ⬜ Transcript obtained (platform subtitles or Whisper). Not wired: the extractor returns metadata only ([KI-15](../reference/status.md#known-issues-and-limitations)).
-5. ⬜ Normalise → chunk → embed → store. Whether a *raw* and a *cleaned* transcript are stored separately, and where the raw file lives, is **Decision pending** (the model has a single `text` + `segments`). The video is `imported` once metadata is stored; it is *searchable* when its transcript is ready and its chunks are embedded (derived, not a status value).
-6. ✅ (API only) A `SourceVideo` row can be created manually via `POST /api/v1/sources`.
+1. ✅ User opens **Sources → Videos → Add source → YouTube URL** and pastes a URL.
+2. ✅ System validates and classifies it without network access; channel/playlist URLs are refused with a clear message; adding an existing video shows "already in your library" with a link.
+3. ✅ A background run fetches metadata via yt-dlp (optional extra — without it the dialog shows an install hint) and records channel, thumbnail, duration and language.
+4. ✅ Captions are obtained (manual first, then automatic; no media downloaded). If there are none, the source stays `imported`, its transcript is marked failed (`no_captions`) and the UI offers **Upload transcript instead**, which attaches a transcript to the *same* source. ⬜ Speech-to-text fallback (Whisper) is not wired.
+5. ✅ Normalise → chunk → store: the raw caption file is kept as received, the cleaned text and timestamped segments are stored, chunks are written, and the video is *searchable* by keyword. ⬜ Embeddings are Planned (P11).
+6. ✅ The user can retry a failed import, search transcripts (with timestamps), add the source to a project, and see where it is used.
 
-Detail: [ingestion-workflow](../workflows/ingestion-workflow.md), [transcript-pipeline](../domains/transcript-pipeline.md).
+Live-verified once with a public video that has manual captions (2026-10-01); other cases are covered by recorded fixtures ([verification record](../reference/status.md#verification-record)).
+
+Add by **transcript** (✅): Add source → *Upload or paste* a `.txt`/`.srt`/`.vtt` (≤ 5 MB) with a title; identical content is recognised as an existing source (even across formats).
+
+Detail: [ingestion-workflow](../workflows/ingestion-workflow.md), [transcript-pipeline](../domains/transcript-pipeline.md), [sources API](../api/resources/source-videos.md).
 
 ## F2 — Import a channel
 
@@ -37,7 +41,7 @@ All steps ⬜ planned. The canonical description of this flow (and of incrementa
 
 ## F3 — Explore the library
 
-1. 🟡 Browse Channels / Videos / Topics / Collections lists (read-only tables with empty states). The UI has **no create/edit/delete** for these; only Projects can be created from the UI (records can be created through the API).
+1. 🟡 Browse Channels / Videos / Topics / Collections lists. **Videos is the full Source Library** (add, search, detail, retry, delete, usage); Channels, Topics and Collections are read-only tables with empty states — the UI has **no create/edit/delete** for them; Projects can be created from the UI (and linked to sources); other records can be created through the API.
 2. ⬜ Semantic search, "similar to this idea", "unused ideas in History", "already made a video on this?" ([rag-strategy](../ai/rag-strategy.md)).
 3. ⬜ Add videos to a collection (table exists; no endpoint/UI).
 

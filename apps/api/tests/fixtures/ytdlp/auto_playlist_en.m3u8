@@ -1,0 +1,7 @@
+#EXTM3U
+#EXT-X-VERSION:3
+#EXT-X-PLAYLIST-TYPE:VOD
+#EXT-X-TARGETDURATION:600
+#EXTINF:18,
+https://www.youtube.com/api/timedtext?caps=asr&v=REDACTED&lang=en&ip=REDACTED&ipbits=REDACTED&expire=REDACTED&sparams=REDACTED&signature=REDACTED&key=REDACTED&fmt=vtt&range=REDACTED
+#EXT-X-ENDLIST

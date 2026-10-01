@@ -1,0 +1,7 @@
+1
+00:00:00,000 --> 00:00:02,000
+{\an8}<i>[Music]</i>
+
+2
+00:00:02,000 --> 00:00:05,000
+Tom &amp; Jerry <font color="#ff0000">run</font>&nbsp;away

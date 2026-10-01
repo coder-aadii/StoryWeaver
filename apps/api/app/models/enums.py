@@ -41,6 +41,16 @@ class RenderStatus(enum.StrEnum):
     FAILED = "failed"
 
 
+class RunStatus(enum.StrEnum):
+    """State of one persisted workflow run (see models.WorkflowRun)."""
+
+    QUEUED = "queued"
+    RUNNING = "running"
+    SUCCEEDED = "succeeded"
+    FAILED = "failed"
+    INTERRUPTED = "interrupted"
+
+
 class SceneStatus(enum.StrEnum):
     """Per-scene state so a single scene can be regenerated independently."""
 

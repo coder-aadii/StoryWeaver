@@ -4,7 +4,7 @@
 
 ## Status
 
-Partially implemented. Path safety is implemented; permissions/encryption are not.
+Partially implemented. Path safety is implemented and **in use** (raw transcripts, P1); permissions/encryption are not.
 
 ## Implemented
 

@@ -4,7 +4,7 @@
 
 ## Status
 
-**Partially implemented** — domain models and extractor interface only. The scan/choose/import flow is **Planned — not implemented**.
+**Partially implemented — linkage only.** Since P1 (2026-10-01) a single-video import records and links its channel (a `Channel` row upserted by the canonical `UC…` id). The scan/choose/import/sync flow is **Planned — not implemented** (P11); channel and playlist URLs are refused by `POST /sources/from-url` with `422 unsupported_kind` ("channel and playlist import arrives in a later release").
 
 ## Purpose
 
@@ -79,8 +79,9 @@ Enumeration, counting, dedup against existing `external_id`s, rate limiting/back
 
 - `classify_youtube_url` distinguishes video / channel / playlist (tested).
 - `YouTubeExtractor.list_videos` (optional yt-dlp extra, untested live).
-- `Channel` table with `video_count`, `status`, `error`; `/api/v1/channels` CRUD; read-only UI list.
-- No scan endpoint, no import workflow, no incremental sync.
+- `Channel` table with `video_count`, `status`, `error`; `/api/v1/channels` CRUD (create validates a YouTube *channel* URL); read-only UI list.
+- Channel linkage from single-video imports (see above); `GET /sources` shows `channel_title`.
+- No scan endpoint, no import workflow, no incremental sync; `video_count` is not populated.
 
 ## Planned implementation
 
@@ -90,7 +91,7 @@ Scan endpoint → confirmation → `LocalRunner` job → later Temporal. Increme
 
 Handle-vs-channel-id URLs; channels with Shorts/live tabs; region-locked or age-gated videos; rate limiting; channel renamed (identity is `external_id`, not title); count changes between scan and import.
 
-**Channel identity risk ([KI-24](../reference/status.md#known-issues-and-limitations)).** `classify_youtube_url` returns the URL fragment for a channel (`@handle`, `channel/UC…`, `c/name`). Handles can change, so storing that string as `Channel.external_id` would create a duplicate row after a rename. The canonical channel id must come from the extractor's output (`NormalizedSource.channel_external_id`). **Unbuilt mapping:** nothing maps `NormalizedSource.channel_external_id` to `SourceVideo.channel_id` (a UUID foreign key) — that upsert logic is part of the future import workflow.
+**Channel identity ([KI-24](../reference/status.md#known-issues-and-limitations), resolved for single-video imports in P1).** `classify_youtube_url` still returns only the URL fragment for a channel URL (`@handle`, `channel/UC…`, `c/name`), and handles can change — so that fragment must not become `Channel.external_id`. The extractor returns the canonical id instead (`NormalizedSource.channel_external_id`, validated as `UC` + 22 characters, never a handle) and a canonical `channel_url`; `ingestion.service.upsert_channel` upserts the `Channel` row by that id and `_apply_metadata` sets `source_videos.channel_id`. A future channel import must resolve the canonical id from extractor output, not from the URL.
 
 ## Open questions
 

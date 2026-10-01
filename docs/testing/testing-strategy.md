@@ -8,15 +8,15 @@ Partially implemented. Unit/integration/API/E2E basics exist; media, AI-evaluati
 
 ## Layers
 
-> **This table is the only place test counts are kept.** Other testing and development documents link here instead of repeating numbers, so they cannot drift. Counts below were true after P0 foundation hardening (2026-10-01; 232 pytest tests in total); re-count with the commands in the [testing guide](../development/testing.md) when tests change.
+> **This table is the only place test counts are kept.** Other testing and development documents link here instead of repeating numbers, so they cannot drift. Counts below were true after P1 Source Library V1 (2026-10-01; 497 pytest tests in total); re-count with the commands in the [testing guide](../development/testing.md) when tests change.
 
 | Layer | Tool | Count today | Doc |
 | --- | --- | --- | --- |
-| Python unit | pytest | 220 run without a DB (includes provider contract, logging, config, validation, DB-safety and Python↔zod contract tests) | [unit](unit-testing.md) |
-| DB integration + API | pytest + real PostgreSQL/pgvector | 12 (skipped without `TEST_DATABASE_URL`) | [integration](integration-testing.md), [API](api-testing.md) |
-| Web unit | Vitest + Testing Library | 7 | [frontend](frontend-testing.md) |
+| Python unit | pytest | 400 run without a DB (includes provider contract, logging, config, validation, DB-safety, Python↔zod contract, parser, normalizer, fingerprint, extractor/caption and URL tests) | [unit](unit-testing.md) |
+| DB integration + API | pytest + real PostgreSQL/pgvector | 105 (skipped without `TEST_DATABASE_URL`; includes the ingestion service, Source Library API, runs, models and migration tests) | [integration](integration-testing.md), [API](api-testing.md) |
+| Web unit | Vitest + Testing Library | 87 | [frontend](frontend-testing.md) |
 | Video package | Vitest | 14 (includes the Python↔zod contract test) | [media](media-testing.md) |
-| End-to-end | Playwright | 2 | [E2E](e2e-testing.md) |
+| End-to-end | Playwright | 3 (navigation ×2, Source Library upload → search → duplicate notice) | [E2E](e2e-testing.md) |
 | AI output quality | — | 0 | [AI evaluation](ai-evaluation.md) |
 
 ## Principles
@@ -29,10 +29,10 @@ Partially implemented. Unit/integration/API/E2E basics exist; media, AI-evaluati
 
 ## Results to expect
 
-- Without `TEST_DATABASE_URL`: pytest reports the DB-free tests passing and the 12 DB tests **skipped** — a green run that did not exercise the database.
+- Without `TEST_DATABASE_URL`: pytest reports the DB-free tests passing and the 105 DB tests **skipped** — a green run that did not exercise the database.
 - With it: all pass. `TEST_DATABASE_URL` is **destructive** (downgrade to base, re-migrate, truncate); a guard refuses databases not named `*_test` and the application database before any DDL, but the target must still be disposable.
 - `make test` also runs the web and video Vitest suites; `make e2e` (Playwright) is separate and needs the dev stack.
 
 ## Gaps
 
-No CI ([KI-10](../reference/status.md#known-issues-and-limitations)), no coverage measurement, no real-provider smoke tests (provider adapters are covered by a shared mocked-HTTP contract suite only). The Python↔zod `Timeline` contract is enforced by shared sample documents (`packages/schemas/samples/`, previously KI-7 — remaining gaps are listed in [status](../reference/status.md#known-issues-and-limitations)), and test-order sensitivity from the cached engine was removed in P0 (previously KI-11). Gate definitions: [quality gates](quality-gates.md). Developer how-to: [testing guide](../development/testing.md).
+No CI ([KI-10](../reference/status.md#known-issues-and-limitations)), no coverage measurement, no real-provider smoke tests (provider adapters are covered by a shared mocked-HTTP contract suite only). The Python↔zod `Timeline` contract is enforced by shared sample documents (`packages/schemas/samples/`, previously KI-7 — remaining gaps are listed in [status](../reference/status.md#known-issues-and-limitations)), and test-order sensitivity from the cached engine was removed in P0 (previously KI-11). The YouTube path is tested with recorded and synthetic fixtures and a fake extractor only; its sole live verification is **one manual run** recorded in the [verification record](../reference/status.md#verification-record) — automatic-caption-only, long, non-English and private videos were not run live. Gate definitions: [quality gates](quality-gates.md). Developer how-to: [testing guide](../development/testing.md).

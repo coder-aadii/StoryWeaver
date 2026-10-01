@@ -4,7 +4,7 @@
 
 ## Status
 
-**Partially implemented.** Column type, HNSW index, provider `embed()` adapters and chunking exist; a test proves cosine nearest-neighbour ordering. **Embedding generation, search endpoints and RAG are Planned — not implemented.**
+**Partially implemented.** Column type, HNSW index, provider `embed()` adapters and chunking exist; a test proves cosine nearest-neighbour ordering. **Embedding generation, semantic search endpoints and RAG are Planned — not implemented.** The Source Library (P1) does write chunks for every ingested transcript, with `embedding` left NULL; its keyword search uses a separate generated `tsvector` column with a GIN index, not these vectors ([source library](../domains/source-library.md)).
 
 ## Storage (implemented)
 

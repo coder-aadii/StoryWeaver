@@ -18,7 +18,7 @@
 
 | Concern | Enforcement | Where |
 | --- | --- | --- |
-| Only YouTube hosts accepted for YouTube extraction; schemes limited to http(s); ids pattern-checked | Implemented in the extractor **and** at `POST /sources` / `POST /channels` (previously KI-12, resolved for create in P0); update endpoints cannot change `url`; any future fetch must still re-validate | `ingestion/youtube.py` → [input-validation](../security/input-validation.md) |
+| Only YouTube hosts accepted for YouTube extraction; schemes limited to http(s); ids pattern-checked | Implemented in the extractor **and** at the creation routes: sources exist only via `POST /sources/from-url` (YouTube video URLs; the raw `POST /sources` was removed in P1) and `POST /sources/from-transcript`; `POST /channels` validates its URL (previously KI-12, resolved in P0/P1). Update endpoints cannot change `url`; any future fetch must still re-validate | `ingestion/youtube.py` → [input-validation](../security/input-validation.md) |
 | No shell invocation of user input; yt-dlp used via Python API | Implemented | [file-security](../security/file-security.md) |
 | Provider keys not exposed to the browser; logs mask secret-named keys and scrub secret-shaped values, including exception text (best-effort) | Partial | [secrets](../security/secrets.md) |
 | Unique source per `(platform, external_id)` (no silent duplicates) | Implemented | [source-library](../domains/source-library.md) |
