@@ -10,6 +10,8 @@ Implemented (maintained manually).
 
 - Added the full documentation system under `docs/` (171 files), then applied an audit pass: corrected factual errors, added the canonical [known issues](status.md#known-issues-and-limitations) list, requirements/glossary/status entries, and consolidated duplicated explanations. No code changed.
 
+- Added [external resources](external-resources.md): ~65 reviewed third-party GitHub repos by need (images, voice, video/editor, source/intelligence, provider lists) with licences and cautions — reference only, none adopted.
+
 ## 2026-10-01 — Initial foundation
 
 - FastAPI backend with 10 CRUD resource groups and health endpoints; PostgreSQL + pgvector schema (17 tables) with Alembic.

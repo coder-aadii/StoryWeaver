@@ -221,4 +221,6 @@ See [`08-hardening-and-post-mvp.md`](08-hardening-and-post-mvp.md): **P11** chan
 
 ## 16. Links
 
+Reviewed third-party references (not dependencies): [external resources](../docs/reference/external-resources.md) — the free-LLM-API list feeds the P2 provider benchmark; the voice-engine list feeds the P7 TTS spike.
+
 Design and status live in [`docs/`](../docs/README.md): [status](../docs/reference/status.md) · [architecture](../docs/architecture/overview.md) · [source library](../docs/domains/source-library.md) · [story generation](../docs/domains/story-generation.md) · [storyboard](../docs/domains/storyboard-system.md) · [workflow overview](../docs/workflows/workflow-overview.md) · [timeline spec](../docs/media/timeline-specification.md) · [Studio](../docs/frontend/studio.md) · [agent guide](../docs/development/ai-agent-guide.md).

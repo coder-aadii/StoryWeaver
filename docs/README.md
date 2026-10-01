@@ -36,7 +36,7 @@ StoryWeaver today is a **foundation**: API, database schema, provider interfaces
 | [testing/](testing/testing-strategy.md) | Strategy and gates |
 | [security/](security/security-overview.md) | Threat model, secrets, validation, file safety |
 | [decisions/](decisions/README.md) | Architecture Decision Records |
-| [reference/](reference/status.md) | [Status](reference/status.md), [glossary](reference/glossary.md), [commands](reference/commands.md), [environment](reference/environment-reference.md), [schemas](reference/schemas.md), [changelog](reference/changelog.md) |
+| [reference/](reference/status.md) | [Status](reference/status.md), [glossary](reference/glossary.md), [commands](reference/commands.md), [environment](reference/environment-reference.md), [schemas](reference/schemas.md), [external resources](reference/external-resources.md), [changelog](reference/changelog.md) |
 
 ## Entry points by role
 
