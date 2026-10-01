@@ -45,13 +45,14 @@ Details: [`docs/architecture/overview.md`](docs/architecture/overview.md),
 
 Python 3.12 · FastAPI · Pydantic · SQLAlchemy 2 · Alembic · uv — PostgreSQL 16 + pgvector —
 Next.js 16 · React 19 · TypeScript (strict) · Tailwind 4 · shadcn/ui · Zustand · TanStack Query —
-Remotion 4 · FFmpeg — pytest · ruff · pyright · Vitest · Playwright · ESLint · Prettier.
+Remotion 4 (bundles its own ffmpeg) — pytest · ruff · pyright · Vitest · Playwright · ESLint · Prettier.
 
 ## Prerequisites
 
-Node ≥ 20 and pnpm, [uv](https://docs.astral.sh/uv/) (installs Python 3.12 for you), FFmpeg (for the
-Remotion render), and **either** Docker **or** the Docker-free Postgres helper below. No GPU, Ollama, ComfyUI
-or cloud key is needed to boot.
+Node ≥ 20 and pnpm, [uv](https://docs.astral.sh/uv/) (installs Python 3.12 for you), and **either** Docker **or**
+the Docker-free Postgres helper below. A system FFmpeg is **not** required: Remotion bundles its own
+`ffmpeg`/`ffprobe` and downloads a headless Chrome on first render (install FFmpeg only if you want to probe
+output files yourself). No GPU, Ollama, ComfyUI or cloud key is needed to boot.
 
 ## Quick start
 
@@ -87,7 +88,9 @@ troubleshooting: [`docs/development/setup.md`](docs/development/setup.md).
 See [`.env.example`](.env.example). All AI providers are optional; nothing fails at startup when they are
 unset. Model names are configuration (`DEFAULT_LLM_MODEL`, `SCRIPT_LLM_MODEL`, …), never hard-coded.
 Keys are read by the API only and never sent to the browser; `GET /api/v1/health/providers` reports
-configured/available without exposing them.
+configured/available without exposing them. The web app reads its own `apps/web/.env.local` (see
+`apps/web/.env.example`), not the root `.env`. The full variable list is in
+[`docs/reference/environment-reference.md`](docs/reference/environment-reference.md).
 
 ## Project structure
 

@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import BinaryIO, Protocol
 
 from app.core.config import get_settings
-from app.core.errors import UnsafePathError
+from app.core.errors import FileTooLargeError, UnsafePathError
 
 BUCKETS = (
     "sources", "transcripts", "embeddings", "images", "audio", "music", "sfx", "projects",
@@ -54,7 +54,7 @@ class LocalStorage:
                 while chunk := data.read(1024 * 1024):
                     size += len(chunk)
                     if size > limit:
-                        raise ValueError(f"file exceeds max size of {limit} bytes")
+                        raise FileTooLargeError(f"file exceeds max size of {limit} bytes")
                     digest.update(chunk)
                     out.write(chunk)
             tmp.replace(path)

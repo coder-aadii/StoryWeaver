@@ -1,0 +1,30 @@
+{
+  "scene_id": "scene_001",
+  "sequence": 1,
+  "narration": "A small band walked south.",
+  "duration": 3.2,
+  "visual_intent": "Wide shot of a small group on a glacier",
+  "characters": [
+    "elder"
+  ],
+  "locations": [
+    "glacier"
+  ],
+  "objects": [
+    "torch"
+  ],
+  "action": "walking",
+  "emotion": "resolve",
+  "camera": {
+    "shot": "wide",
+    "movement": "pan_left"
+  },
+  "image_prompt": "storybook illustration, glacier, small group walking",
+  "negative_prompt": "photo, text",
+  "voice": "narrator",
+  "music": "calm",
+  "sfx": [
+    "wind"
+  ],
+  "subtitle": "A small band walked south."
+}

@@ -23,7 +23,7 @@ db-revision: ## autogenerate a migration: make db-revision m="message"
 	cd apps/api && uv run alembic revision --autogenerate -m "$(m)"
 
 dev-api:   ## API on :8000
-	cd apps/api && uv run uvicorn app.main:app --reload --port 8000
+	cd apps/api && uv run uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 
 dev-web:   ## web on :3100
 	pnpm --filter @storyweaver/web dev

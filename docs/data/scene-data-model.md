@@ -29,7 +29,7 @@
 
 ## Timeline contract (implemented)
 
-`TimelineScene`: `scene_id`, `start`, `duration`, `narration`, `subtitle`, `image_src`, `audio_src`, `camera`. `Timeline`: `version`, `fps` 30, `width` 1920, `height` 1080, `scenes`. Built by `build_timeline` ([timeline-specification](../media/timeline-specification.md)). Mirrored in zod in `packages/video`, by hand and with known differences ([KI-7](../reference/status.md#known-issues-and-limitations)).
+`TimelineScene`: `scene_id`, `start`, `duration`, `narration`, `subtitle`, `image_src`, `audio_src`, `camera`. `Timeline`: `version`, `fps` 30, `width` 1920, `height` 1080, `scenes`. Built by `build_timeline` ([timeline-specification](../media/timeline-specification.md)). Mirrored in zod in `packages/video` by hand, with both sides checked against shared sample documents ([KI-7](../reference/status.md#known-issues-and-limitations), mitigated in P0).
 
 ## Target canonical representation (Planned — not implemented)
 

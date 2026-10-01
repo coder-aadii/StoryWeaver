@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "fps": 30,
+  "width": 1920,
+  "height": 1080,
+  "scenes": [
+    {
+      "scene_id": "scene_001",
+      "start": 0.0,
+      "duration": 2.0,
+      "narration": "",
+      "subtitle": null,
+      "image_src": null,
+      "audio_src": null,
+      "camera": {
+        "shot": "medium",
+        "movement": "static"
+      }
+    }
+  ]
+}

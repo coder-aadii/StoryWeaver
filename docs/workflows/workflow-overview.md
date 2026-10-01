@@ -94,7 +94,7 @@ flowchart LR
     F --> G[expensive assets: images, voice] --> H[timeline] --> I[render] --> J[QA]
 ```
 
-Provider calls inside any stage must be: observable (logged with provider/model/duration), timeout-controlled, schema-validated, retryable, and isolated — a provider failure sets the *step's* entity to `failed` and never corrupts project state. **Current limitation ([KI-3](../reference/status.md#known-issues-and-limitations)):** only `httpx.HTTPError` is wrapped as `ProviderError`; a malformed 200 response escapes as a raw exception, so each step must catch broadly at its boundary. Routing: [../ai/model-routing.md](../ai/model-routing.md).
+Provider calls inside any stage must be: observable (logged with provider/model/duration), timeout-controlled, schema-validated, retryable, and isolated — a provider failure sets the *step's* entity to `failed` and never corrupts project state. Provider failures already surface as typed `ProviderError` subclasses (`ProviderTimeoutError`, `ProviderResponseError`; previously KI-3, resolved in P0), so each step can decide per class whether to retry; persisting that state is part of the workflow phases. Routing: [../ai/model-routing.md](../ai/model-routing.md).
 
 ## Artifact dependency graph — Target (Decision pending)
 

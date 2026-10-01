@@ -43,4 +43,4 @@ apps/web/
 
 ## Failure modes and limitations
 
-`next/font/google` fetches fonts at build/dev time, so a fully offline first build can fail — *Decision pending* on self-hosting fonts. Tracked as [KI-25](../reference/status.md#known-issues-and-limitations). Environment: `NEXT_PUBLIC_API_URL` is inlined at build time and must be set in `apps/web/.env.local` or the shell, not the root `.env` ([KI-21](../reference/status.md#known-issues-and-limitations)). `next dev` also binds beyond localhost ([KI-20](../reference/status.md#known-issues-and-limitations)).
+`next/font/google` fetches fonts at build/dev time, so a fully offline first build can fail — *Decision pending* on self-hosting fonts. Tracked as [KI-25](../reference/status.md#known-issues-and-limitations). Environment: `NEXT_PUBLIC_API_URL` is inlined at build time and must be set in `apps/web/.env.local` or the shell (see `apps/web/.env.example`), not the root `.env`; the dev/start scripts bind to `127.0.0.1`.

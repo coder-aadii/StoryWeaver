@@ -11,12 +11,15 @@ Settings are read from the process environment, then `<repo>/.env`. Names are ca
 | Variable | Default | Purpose |
 | --- | --- | --- |
 | `DATABASE_URL` | `postgresql+psycopg://storyweaver:storyweaver@localhost:5433/storyweaver` | SQLAlchemy URL (psycopg 3) |
-| `TEST_DATABASE_URL` | unset | Used only by pytest; DB tests skip without it. **Tests drop and recreate all tables** — never point it at real data |
-| `STORAGE_ROOT` | `<repo>/data` (only when **unset**) | Local storage root. **An empty `STORAGE_ROOT=` (as shipped in `.env.example`) resolves to `.`** ([KI-1](status.md#known-issues-and-limitations)) — delete or comment out the line |
+| `TEST_DATABASE_URL` | unset | Used only by pytest (read from the environment, not `Settings`); DB tests skip without it. **Tests drop and recreate all tables** — the database name must end in `_test` and must differ from `DATABASE_URL`, or the run is refused before any DDL (see `STORYWEAVER_ALLOW_DESTRUCTIVE_TESTS`) |
+| `STORAGE_ROOT` | `<repo>/data` | Local storage root. An empty or blank value means "unset" and also resolves to `<repo>/data`; a relative value resolves against the repository root (previously KI-1, resolved in P0 — [history](status.md#known-issues-and-limitations)) |
 | `MAX_UPLOAD_BYTES` | 536870912 | Cap enforced by `LocalStorage.put` |
 | `ENVIRONMENT` | `development` | Label only |
 | `LOG_LEVEL` | `INFO` | Structured log level |
-| `CORS_ORIGINS` | `["http://localhost:3000","http://localhost:3100"]` | JSON list |
+| `CORS_ORIGINS` | `["http://localhost:3000","http://localhost:3100","http://127.0.0.1:3100"]` | JSON list of allowed browser origins |
+| `LLM_TIMEOUT_SECONDS` | 120 | HTTP timeout for every provider call (LLM and embeddings); a timeout raises `ProviderTimeoutError` |
+| `DB_CONNECT_TIMEOUT_SECONDS` | 10 | Database connect timeout (1–120); bounds how long an unreachable host can stall a request or `/health/ready` |
+| `STORYWEAVER_ALLOW_DESTRUCTIVE_TESTS` | unset | Tests only: set to `1` to allow a `TEST_DATABASE_URL` whose name does not end in `_test` (never the application database) |
 | `OLLAMA_BASE_URL` | `http://localhost:11434` | Ollama (LLM + embeddings) |
 | `GOOGLE_AI_API_KEY` | empty | Google adapter (header auth) |
 | `GROK_API_KEY` | empty | xAI adapter |
@@ -34,4 +37,4 @@ Settings are read from the process environment, then `<repo>/.env`. Names are ca
 | `NEXT_PUBLIC_API_URL` | `http://localhost:8000` | Web → API base URL (browser-visible; no secrets). Next.js reads env files from `apps/web/`, so set it in `apps/web/.env.local` or the shell, not the root `.env` ([KI-21](status.md#known-issues-and-limitations)) |
 | `PLAYWRIGHT_CHROMIUM_PATH` | unset | Use an existing Chromium for e2e |
 
-Note: `ENVIRONMENT`, `LOG_LEVEL`, `MAX_UPLOAD_BYTES` and `CORS_ORIGINS` are settings but are not in `.env.example` ([KI-26](status.md#known-issues-and-limitations)). This table is the canonical variable reference; [operations/environment-variables](../operations/environment-variables.md) and [configuration](../operations/configuration.md) give guidance and link here.
+Note: `ENVIRONMENT`, `LOG_LEVEL`, `MAX_UPLOAD_BYTES` and `CORS_ORIGINS` are listed in `.env.example` as commented defaults (KI-26, partly resolved in P0); `LLM_TIMEOUT_SECONDS`, `DB_CONNECT_TIMEOUT_SECONDS` and `EMBEDDING_DIMENSIONS` are settings that work if set but are not listed there. This table is the canonical variable reference; [operations/environment-variables](../operations/environment-variables.md) and [configuration](../operations/configuration.md) give guidance and link here.

@@ -133,7 +133,7 @@ URL validation, id extraction, metadata normalization, transcript cleaning rules
 
 ## Current limitations
 
-See the canonical list in [status](../reference/status.md#known-issues-and-limitations): KI-12 (API-created sources are not URL-validated), KI-13 (transcript version), KI-14 (uploads not representable), KI-15 (extractor is metadata-only), KI-22 (no used-idea/source-usage storage), KI-23 (no thumbnail column, no sync cursor), KI-24 (channel identity from URL fragment).
+See the canonical list in [status](../reference/status.md#known-issues-and-limitations): KI-13 (transcript version), KI-14 (uploads not representable), KI-15 (extractor is metadata-only), KI-22 (no used-idea/source-usage storage), KI-23 (no thumbnail column, no sync cursor), KI-24 (channel identity from URL fragment). API-created sources and channels are URL-validated on create (previously KI-12, resolved in P0).
 
 ## Planned implementation
 

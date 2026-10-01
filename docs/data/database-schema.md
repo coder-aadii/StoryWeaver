@@ -34,7 +34,7 @@ Legend: **NN** = NOT NULL, **null** = nullable. Types are PostgreSQL types as em
 | `platform` | varchar(32) | NN | Python default `youtube` |
 | `external_id` | varchar(128) | NN | |
 | `title` | varchar(512) | NN | |
-| `url` | varchar(2048) | NN | not validated (see [KI-12](../reference/status.md#known-issues-and-limitations)) |
+| `url` | varchar(2048) | NN | validated at the API on create (YouTube video URL for `platform=youtube`, `http(s)` otherwise); no database constraint |
 | `status` | varchar(32) | NN | `SourceStatus`, default `discovered`; indexed |
 | `video_count` | integer | null | |
 | `error` | text | null | |

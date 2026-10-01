@@ -4,9 +4,9 @@
 
 ## Status
 
-*Amended 2026-10-01: rewritten in place with Context/Alternatives/Revisit sections and pointers to later ADRs (the only in-place rewrite; later ADRs are append-only).*
-
 Accepted · 2026-10-01 · **Implemented** (foundation phase). Superseded in part by later ADRs, which are authoritative where they differ: item 2 → [ADR-006](ADR-006-modular-monolith.md); items 3, 7 and 10 → [ADR-005](ADR-005-postgres-pgvector.md); item 6 → [ADR-007](ADR-007-media-rendering-strategy.md) and [ADR-004](ADR-004-ai-vs-deterministic-responsibilities.md). Related: [ADR index](README.md).
+
+*Amended 2026-10-01: rewritten in place with Context/Alternatives/Revisit sections and pointers to later ADRs (the only in-place rewrite; later ADRs are append-only).*
 
 ## Context
 

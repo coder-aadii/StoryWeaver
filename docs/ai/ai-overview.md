@@ -25,7 +25,7 @@ flowchart LR
 
 | Capability | State |
 | --- | --- |
-| `LLMProvider.generate` / `generate_structured`, `EmbeddingProvider.embed` | Implemented (mechanism, unit-tested with fakes) ([`providers/base.py`](../../apps/api/app/intelligence/providers/base.py)); non-`HTTPError` failures are not wrapped ([KI-3](../reference/status.md#known-issues-and-limitations)) |
+| `LLMProvider.generate` / `generate_structured`, `EmbeddingProvider.embed` | Implemented (mechanism; failures surface as `ProviderError` subclasses; verified with fakes and a shared mocked-HTTP contract suite, never against live services in automated tests) ([`providers/base.py`](../../apps/api/app/intelligence/providers/base.py)) |
 | Adapters: Ollama, Google, OpenRouter, Grok, Claude-compatible | Implemented as thin HTTP clients; only Ollama's chat request shape has a mocked-HTTP test (all embedding adapters and the other LLM adapters are untested); none exercised against a real service |
 | Lazy registry (`get_llm`, `get_embeddings`, `llm_status`) | Implemented |
 | Per-task model settings (`analysis/story/script/classification`) | Implemented as configuration ([`config.py`](../../apps/api/app/core/config.py)) |

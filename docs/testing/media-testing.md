@@ -19,17 +19,16 @@ Partially implemented (timeline/camera logic and one manual render). No automate
 ## Planned — not implemented
 
 - Render smoke test in automation (render 1 s, `ffprobe` duration/resolution/codec).
-- Python↔zod `Timeline` contract test (schema export diff) — none exists today ([KI-7](../reference/status.md#known-issues-and-limitations)); known differences: `camera` is required in zod but defaults in Python, and `camera.shot` is a free string in zod but a fixed set in Python.
+- Remaining contract gaps ([KI-7](../reference/status.md#known-issues-and-limitations)): Pydantic `Timeline.fps`/`width`/`height` have no positivity constraint (zod requires > 0), so those cases are not in the shared samples; `zod` is pinned to Remotion's required 4.5.4 (exact, no `^`).
 
-## Manual contract-drift check (not automated)
+## Python↔zod timeline contract (automated since P0)
 
-After changing `apps/api/app/schemas/scene.py` or `packages/video/src/types.ts`:
+`scripts/export_schemas.py` (via `make schemas`) writes the JSON Schema **and** canonical valid/invalid sample documents to `packages/schemas/samples/`. Two tests consume the same files:
 
-1. `make schemas` and review the diff of `packages/schemas/timeline.schema.json`.
-2. Compare it field by field with `timelineScene`/`timelineSchema` in `types.ts`: names, required vs defaulted, enums (`CameraMovement`, `ShotType`), numeric constraints.
-3. Update `packages/video/sample/timeline.json` if the shape changed, then run `make test-web` and `make render-sample`.
+- `apps/api/tests/test_timeline_contract.py` — Pydantic must accept every valid sample (and produce the recorded normalised form) and reject every invalid one.
+- `packages/video/src/contract.test.ts` — the zod `timelineSchema` must do the same.
 
-This is a review procedure, not a gate.
+A change to only one side therefore fails `make test` (checked with deliberate one-sided breaks during P0). After changing `apps/api/app/schemas/scene.py` or `packages/video/src/types.ts`: run `make schemas`, review the diff of `packages/schemas/`, update `packages/video/sample/timeline.json` if the shape changed, then run `make test` and `make render-sample`. Fixture and render-path details: [ADR-009](../decisions/ADR-009-render-asset-resolution.md).
 - Frame-level checks (non-black, subtitle region), audio loudness/clipping, A/V sync: see [quality architecture](../architecture/quality-architecture.md), [QA workflow](../workflows/qa-workflow.md).
 
 Renders are slow and need a headless Chrome (Remotion downloads it and bundles its own FFmpeg; system FFmpeg is not required), so they would belong in a separate, opt-in gate ([quality gates](quality-gates.md)).

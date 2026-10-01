@@ -23,8 +23,8 @@ Treat as secrets (never commit, never log, never send to the browser): `GOOGLE_A
 ## Handling rules
 
 - Restart the API after changing `.env` (`get_settings()` is cached).
-- An **empty** value is not the same as an **unset** one; leave a variable out entirely if you want its default. In particular remove `STORAGE_ROOT=` from a copied `.env` ([KI-1](../reference/status.md#known-issues-and-limitations)).
-- `.env.example` is incomplete: it omits `ENVIRONMENT`, `LOG_LEVEL`, `MAX_UPLOAD_BYTES` and `CORS_ORIGINS` ([KI-26](../reference/status.md#known-issues-and-limitations)); they work when set.
+- An **empty** value is not always the same as an **unset** one: `STORAGE_ROOT` treats empty as unset (default `<repo>/data`), but for most string settings empty simply means "not configured". Leave a variable out entirely (or commented) if you want its default. Next.js reads env files from `apps/web/`, so `NEXT_PUBLIC_API_URL` goes in `apps/web/.env.local` (see `apps/web/.env.example`), not the root `.env`.
+- `.env.example` lists `ENVIRONMENT`, `LOG_LEVEL`, `MAX_UPLOAD_BYTES` and `CORS_ORIGINS` as commented defaults (previously missing — KI-26, partly resolved in P0); `LLM_TIMEOUT_SECONDS`, `DB_CONNECT_TIMEOUT_SECONDS` and `EMBEDDING_DIMENSIONS` work when set but are not listed there.
 - `CORS_ORIGINS` must be a JSON array (e.g. `["http://localhost:3100"]`).
 - `EMBEDDING_DIMENSIONS` does not change the database column ([KI-6](../reference/status.md#known-issues-and-limitations)).
 - Never commit `.env` ([secrets](../security/secrets.md)).

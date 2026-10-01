@@ -28,7 +28,7 @@ Per-scene AI video generation (cost/consistency); FFmpeg-only composition (weake
 - Visual consistency relies on the character/visual bible and reference images, not on motion models ([image-consistency](../media/image-consistency.md)).
 - Remotion's licence may apply to the owner's organisation ([content policy](../product/content-policy-and-source-usage.md)).
 - Render needs a headless Chrome (downloaded by Remotion on first render); the encoder is Remotion's bundled one. Render time on CPU-only hardware for a 10–15 minute video is **unmeasured**.
-- Local asset files are not served over HTTP, and the composition uses `<Img src>` directly, so asset resolution for render is **Decision pending** ([KI-17](../reference/status.md#known-issues-and-limitations)).
+- Asset resolution for render is decided in [ADR-009](ADR-009-render-asset-resolution.md): project-relative asset keys resolved with `staticFile()` against a per-render `--public-dir` (proven on a fixture; the staging workflow is Planned, P8). Local asset files are still not served over HTTP ([KI-17](../reference/status.md#known-issues-and-limitations)), so Studio preview of generated assets needs a file-serving route (Planned, P6).
 
 See [rendering-architecture](../architecture/rendering-architecture.md), [remotion](../media/remotion.md), [camera-motion](../media/camera-motion.md).
 

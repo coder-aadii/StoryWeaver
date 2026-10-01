@@ -30,4 +30,4 @@ Example response (`201`):
 ```json
 {"id":"fae5…","created_at":"…","updated_at":"…","title":"Ice Age","description":null,"status":"draft","settings":{},"error":null}
 ```
-`PATCH` with `{"settings": null}` is accepted by the schema but violates NOT NULL → 409 ([errors](../errors.md#known-quirks-code-level-documented-as-is)). The approval-gate state for candidates/storyboards has no defined home yet (*Decision pending*: [domains/project-system](../../domains/project-system.md)); `project_sources` has no endpoint.
+`PATCH` with `{"settings": null}` (or `title`/`status` null) is rejected with 422; only `description` can be cleared with `null` ([errors](../errors.md#behavior-of-patch)). The approval-gate state for candidates/storyboards has no defined home yet (*Decision pending*: [domains/project-system](../../domains/project-system.md)); `project_sources` has no endpoint.

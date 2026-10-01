@@ -35,7 +35,7 @@ sequenceDiagram
 ```
 
 1. **Snapshot**: `renders.timeline` stores the exact JSON rendered, so a render is reproducible.
-2. **Validate (code)**: all referenced assets `ready`, files exist, no scene without duration, `Timeline.duration_seconds` sane. **Asset resolution is Decision pending ([KI-17](../reference/status.md#known-issues-and-limitations)):** `build_timeline` leaves `image_src`/`audio_src` empty, nothing serves `data/` over HTTP, and `BasicComposition` uses `<Img src>` directly, so how local files reach the renderer (a served URL vs Remotion's public directory/`staticFile`) is undecided. The sample render works only because it has no images.
+2. **Validate (code)**: all referenced assets `ready`, files exist, no scene without duration, `Timeline.duration_seconds` sane. **Asset resolution is decided ([ADR-009](../decisions/ADR-009-render-asset-resolution.md), [KI-17](../reference/status.md#known-issues-and-limitations)) but not implemented:** assets are referenced by project-relative keys, staged into a per-render directory and resolved with `staticFile()` against `--public-dir` (proven by a fixture render). Today `build_timeline` leaves `image_src`/`audio_src` empty and nothing stages files, so the steps below remain target design.
 3. **Render**: invoke the Remotion CLI/renderer with argument lists only (no shell strings built from user input). Chrome headless is downloaded by Remotion on first use.
 4. **Post-process (optional)**: FFmpeg for loudness normalisation/encoding where Remotion output is not final ([../media/ffmpeg.md](../media/ffmpeg.md)). Decision pending.
 5. **Register**: output as `RENDER` asset; set `renders.output_asset_id`.

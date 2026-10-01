@@ -13,7 +13,7 @@ Base: `/api/v1/channels` · table: [database-schema](../../data/database-schema.
 | --- | --- | --- |
 | `external_id` | yes | 1–128 chars |
 | `title` | yes | 1–512 |
-| `url` | yes | 1–2048; **not validated at all** — any string is accepted ([KI-12](../../reference/status.md#known-issues-and-limitations)). `classify_youtube_url` runs only inside the extractor, so API-created rows are not URL-checked and any future fetch must re-validate |
+| `url` | yes | 1–2048; validated on create — for `platform=youtube` it must be a YouTube **channel** URL (`classify_youtube_url`; a video or playlist URL is rejected), otherwise an `http(s)` URL; violations are 422. `PATCH` cannot change `url` (previously KI-12, resolved for create in P0). `external_id` is not cross-checked against the URL ([KI-24](../../reference/status.md#known-issues-and-limitations)) |
 | `platform` | no | default `youtube` |
 
 Duplicate `(platform, external_id)` → 409.
@@ -27,7 +27,7 @@ Allowed: `title`, `status` (`discovered|importing|imported|failed`), `video_coun
 ## Other
 `GET /channels` (paged, [pagination](../pagination.md)), `GET /channels/{id}`, `DELETE` → 204 (videos keep existing, `channel_id` set NULL).
 
-Note on identity: `external_id` is caller-supplied. If it is later derived from the URL fragment (`@handle`, `channel/UC…`), a renamed channel could produce a duplicate row; the canonical channel id should come from extractor output ([KI-24](../../reference/status.md#known-issues-and-limitations)). `PATCH` quirks (explicit `null`, no length limits): [errors](../errors.md#known-quirks-code-level-documented-as-is).
+Note on identity: `external_id` is caller-supplied. If it is later derived from the URL fragment (`@handle`, `channel/UC…`), a renamed channel could produce a duplicate row; the canonical channel id should come from extractor output ([KI-24](../../reference/status.md#known-issues-and-limitations)). `PATCH` quirks (explicit `null`, no length limits): [errors](../errors.md#behavior-of-patch).
 
 Example response (`201`):
 ```json

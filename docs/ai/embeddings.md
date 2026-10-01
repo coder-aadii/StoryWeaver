@@ -11,8 +11,8 @@
 - Interface `EmbeddingProvider.embed(texts, *, model) -> list[list[float]]`.
 - Adapters: `OllamaProvider` (`POST /api/embed`), `GoogleProvider` (`batchEmbedContents`). Registry: `get_embeddings()` using `EMBEDDING_PROVIDER` (default `ollama`) and `EMBEDDING_MODEL` (empty by default — you must choose one).
 - Storage: `transcript_chunks.embedding vector(768)`; `embedding_model` string per chunk.
-- Settings has `embedding_dimensions` (default 768), but the database dimension is the constant `EMBEDDING_DIM = 768` in [`models/domain.py`](../../apps/api/app/models/domain.py). **They are not linked automatically**; changing either alone gives inconsistent behaviour, and the schema needs an Alembic migration to change dimension.
-- No batching limits, retries, or dimension checks are implemented: a vector whose length differs from 768 fails only at insert time ([KI-6](../reference/status.md#known-issues-and-limitations)). Google's embedding output size is configurable by model/request, and nothing here pins or verifies it.
+- Settings has `embedding_dimensions` (default 768), but the database dimension is the constant `EMBEDDING_DIM = 768` in [`models/domain.py`](../../apps/api/app/models/domain.py). **They are not linked at runtime** (the setting is read by no code); a unit test (`tests/test_config.py`) only fails if the two *defaults* diverge. Changing either alone gives inconsistent behaviour, and the schema needs an Alembic migration to change dimension.
+- `embed()` checks the provider is configured and a model is set, wraps failures into the `ProviderError` family and verifies one vector per input, but no batching limits, retries or dimension checks are implemented: a vector whose length differs from 768 fails only at insert time ([KI-6](../reference/status.md#known-issues-and-limitations)). Google's embedding output size is configurable by model/request, and nothing here pins or verifies it.
 
 ## Target Architecture
 

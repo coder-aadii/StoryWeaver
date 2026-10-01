@@ -21,7 +21,7 @@ System FFmpeg is **not** required to render: Remotion ships its own `ffmpeg`/`ff
 make setup          # uv sync (apps/api) + pnpm install + copies .env.example to .env if .env is missing
 ```
 
-(If you prefer to copy the file yourself, `cp .env.example .env` is equivalent to that last step.) **Then open `.env` and delete or comment out the `STORAGE_ROOT=` line**: an empty value resolves to the current directory instead of `<repo>/data` ([KI-1](../reference/status.md#known-issues-and-limitations)). `.env.example` also omits a few variables the code reads ([KI-26](../reference/status.md#known-issues-and-limitations)); see the [environment reference](../reference/environment-reference.md).
+(If you prefer to copy the file yourself, `cp .env.example .env` is equivalent to that last step.) The shipped `.env.example` has the optional application variables (`ENVIRONMENT`, `LOG_LEVEL`, `MAX_UPLOAD_BYTES`, `CORS_ORIGINS`) commented out with their defaults and no longer sets `STORAGE_ROOT` (an empty value now means unset anyway). For the web app, copy `apps/web/.env.example` to `apps/web/.env.local` only if the API is not at `http://localhost:8000`; see the [environment reference](../reference/environment-reference.md).
 
 Optional extras (not needed to boot): `cd apps/api && uv sync --extra ingestion` (yt-dlp), `--extra transcription` (faster-whisper).
 
@@ -52,7 +52,7 @@ The Docker-free database lives only in `data/temporary/pgdata` — see [backups]
 make dev       # API http://localhost:8000 (/docs), web http://localhost:3100
 ```
 
-Web uses 3100 because 3000 is often occupied. If the API lives elsewhere set `NEXT_PUBLIC_API_URL` in **`apps/web/.env.local`** (or the shell); Next.js does not read the repository-root `.env` ([KI-21](../reference/status.md#known-issues-and-limitations)). `next dev` also binds beyond localhost ([KI-20](../reference/status.md#known-issues-and-limitations)). Check readiness:
+Web uses 3100 because 3000 is often occupied. If the API lives elsewhere set `NEXT_PUBLIC_API_URL` in **`apps/web/.env.local`** (or the shell; see `apps/web/.env.example`); Next.js does not read the repository-root `.env`. Both dev servers bind to `127.0.0.1` (`make dev-api` passes `--host 127.0.0.1`; the web scripts pass `-H 127.0.0.1`), and the API allows the `http://localhost:3100` and `http://127.0.0.1:3100` origins. Check readiness:
 
 ```bash
 curl localhost:8000/api/v1/health/ready   # {"status":"ready","database":true,"pgvector":true}
@@ -67,7 +67,7 @@ make lint
 make e2e                        # needs the dev stack running
 ```
 
-**`TEST_DATABASE_URL` is destructive**: the test fixture downgrades the schema to base, re-migrates it, and truncates every table between tests, and nothing guards against pointing it at a database you care about ([KI-19](../reference/status.md#known-issues-and-limitations)). Use a dedicated `storyweaver_test` database. Test counts and layers: [testing strategy](../testing/testing-strategy.md).
+**`TEST_DATABASE_URL` is destructive**: the test fixture downgrades the schema to base, re-migrates it, and truncates every table between tests. It refuses a database whose name does not end in `_test` or that equals `DATABASE_URL` (checked before any DDL), but still use a dedicated `storyweaver_test` database. Test counts and layers: [testing strategy](../testing/testing-strategy.md).
 
 Playwright's bundled browser is unsupported on Ubuntu 20.04; set `PLAYWRIGHT_CHROMIUM_PATH` to any Chromium (see [E2E testing](../testing/e2e-testing.md)).
 

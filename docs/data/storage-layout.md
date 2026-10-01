@@ -14,14 +14,14 @@ data/                  (contents git-ignored; .gitkeep files keep the skeleton)
   music/    sfx/          projects/    renders/ temporary/
 ```
 
-Root: `STORAGE_ROOT` (default `<repo>/data` **only when the variable is unset**; `.env.example` ships it empty, which resolves to the process working directory — [KI-1](../reference/status.md#known-issues-and-limitations)). Bucket names are listed in `app/core/storage.py` (`BUCKETS`). What each directory *will* hold (none is populated by code today): optional source media (`sources`) — **the source library does not require downloading media**; metadata, transcripts, chunks and embeddings are enough, and downloading is an optional future capability when a workflow genuinely needs it; transcript files (`transcripts`) — if raw transcripts are stored as files, the DB has **no column to record the key** (*Decision pending*, see [source-data-model](source-data-model.md)), exported vectors if ever needed (`embeddings`), per-asset-type media, per-project working files (`projects`), final MP4s (`renders`), scratch (`temporary`). The key naming convention (e.g. `images/<project_id>/<scene_id>/<asset_id>.png`) is *Decision pending*.
+Root: `STORAGE_ROOT` (default `<repo>/data` when unset or empty; relative values resolve against the repository root). Bucket names are listed in `app/core/storage.py` (`BUCKETS`). What each directory *will* hold (none is populated by code today): optional source media (`sources`) — **the source library does not require downloading media**; metadata, transcripts, chunks and embeddings are enough, and downloading is an optional future capability when a workflow genuinely needs it; transcript files (`transcripts`) — if raw transcripts are stored as files, the DB has **no column to record the key** (*Decision pending*, see [source-data-model](source-data-model.md)), exported vectors if ever needed (`embeddings`), per-asset-type media, per-project working files (`projects`), final MP4s (`renders`), scratch (`temporary`). The key naming convention (e.g. `images/<project_id>/<scene_id>/<asset_id>.png`) is *Decision pending*.
 
 The dev Docker-free Postgres helper also keeps its cluster in `data/temporary/pgdata` (ignored).
 
 ## `LocalStorage` behaviour (implemented)
 
 - `path_for(key)` resolves under the root and raises `UnsafePathError` for empty keys, leading `/` or `\`, NUL bytes, `..` escapes or the root itself.
-- `put(key, stream)` streams in 1 MiB chunks to `<key>.part`, hashes with sha256, enforces `MAX_UPLOAD_BYTES` (default 512 MiB; raises a plain `ValueError`, not a typed error — an endpoint must map it to HTTP 413), then atomically renames. Returns `(size_bytes, sha256)`. Never loads whole files into memory.
+- `put(key, stream)` streams in 1 MiB chunks to `<key>.part`, hashes with sha256, enforces `MAX_UPLOAD_BYTES` (default 512 MiB; raises the typed `FileTooLargeError`, which the API maps to HTTP 413; the partial file is removed), then atomically renames. Returns `(size_bytes, sha256)`. Never loads whole files into memory.
 - `open`, `exists`, `delete` (idempotent).
 - `sanitize_filename` strips directories and unsafe characters, max 200 chars.
 - Interface: `Storage` protocol so an S3-compatible implementation can be swapped in.

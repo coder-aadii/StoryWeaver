@@ -55,7 +55,7 @@ Prefer 720p/1080p at 30 fps, one render at a time, previews at reduced scale, di
 
 ## Failure modes
 
-Missing asset (and no mechanism yet makes `data/` files fetchable by the renderer — [KI-17](../reference/status.md#known-issues-and-limitations)); Chrome (or Remotion's bundled ffmpeg) unavailable; OOM; disk full; partial output file (write to temp then rename); render timeout. Each leaves the project and other assets untouched.
+Missing asset (the file-staging step that would put assets in the per-render public dir is Planned — [ADR-009](../decisions/ADR-009-render-asset-resolution.md), [KI-17](../reference/status.md#known-issues-and-limitations)); Chrome (or Remotion's bundled ffmpeg) unavailable; OOM; disk full; partial output file (write to temp then rename); render timeout. Each leaves the project and other assets untouched.
 
 ## Related
 

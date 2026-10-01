@@ -12,7 +12,7 @@ Implemented.
 | --- | --- | --- | --- |
 | PostgreSQL + pgvector | `make db-up` (Docker, unverified) or `make db-up-nodocker` | 5433 on `127.0.0.1` for Compose; **no TCP port** for the Docker-free cluster — it listens on a unix socket in `data/temporary/pgdata` | Yes |
 | API (uvicorn `--reload`) | `make dev-api` | 8000 | Yes |
-| Web (Next.js dev) | `make dev-web` | 3100 (binds beyond localhost — prints a LAN URL; see [KI-20](../reference/status.md#known-issues-and-limitations)) | For the UI |
+| Web (Next.js dev) | `make dev-web` | 3100 (bound to `127.0.0.1`) | For the UI |
 | Remotion Studio / render | `pnpm --filter @storyweaver/video studio\|render` | 3000 (Remotion default) | On demand |
 | Ollama, ComfyUI, TTS, Temporal, MinIO | external / opt-in | 11434 / configurable | **No** — none are needed to boot |
 

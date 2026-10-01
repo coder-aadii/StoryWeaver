@@ -9,9 +9,8 @@ Implemented (observed issues).
 | Symptom | Cause | Fix |
 | --- | --- | --- |
 | `make db-up`: `docker: command not found` | Docker not installed | Install Docker, or `make db-up-nodocker` |
-| `/health/ready` → 503 `database:false` | `DATABASE_URL` wrong/DB down (the exception is not logged — [KI-5](../reference/status.md#known-issues-and-limitations)) | Check URL (port 5433 for compose; exported socket URL for Docker-free); start DB; `make db-migrate` |
-| `/health/ready` slow or hangs | Unreachable DB host and no connect timeout ([KI-5](../reference/status.md#known-issues-and-limitations)) | Fix `DATABASE_URL`/host; test with `psql` first |
-| Files appear under `apps/api/` instead of `data/` | `STORAGE_ROOT=` left empty in `.env` ([KI-1](../reference/status.md#known-issues-and-limitations)) | Delete/comment the line and restart the API |
+| `/health/ready` → 503 `database:false` | `DATABASE_URL` wrong/DB down; the response's `error` field names the exception type and the log line `health.ready.failed` has the sanitised detail | Check URL (port 5433 for compose; exported socket URL for Docker-free); start DB; `make db-migrate` |
+| `/health/ready` slow | Unreachable or sleeping database host; the probe gives up after `DB_CONNECT_TIMEOUT_SECONDS` (default 10 s); a scale-to-zero hosted database can need a few seconds to wake | Fix `DATABASE_URL`/host, retry once, test with `psql` first |
 | Web ignores `NEXT_PUBLIC_API_URL` from `.env` | Next.js reads `apps/web/`, not the repo root ([KI-21](../reference/status.md#known-issues-and-limitations)) | Put it in `apps/web/.env.local` and restart `next dev` |
 | `pgvector:false` | Extension missing | Use `pgvector/pgvector:pg16` image or `CREATE EXTENSION vector;`; run migrations |
 | DB tests show as skipped | `TEST_DATABASE_URL` unset or unreachable | Export it (disposable DB!) |

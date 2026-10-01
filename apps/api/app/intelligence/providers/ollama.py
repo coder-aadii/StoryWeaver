@@ -25,7 +25,7 @@ class OllamaProvider(LLMProvider, EmbeddingProvider):
             d = r.json()
         return d["message"]["content"], d.get("prompt_eval_count"), d.get("eval_count")
 
-    def embed(self, texts: list[str], *, model: str) -> list[list[float]]:
+    def _embed(self, texts: list[str], *, model: str) -> list[list[float]]:
         with http_client(self.base_url) as c:
             r = c.post("/api/embed", json={"model": model, "input": texts})
             r.raise_for_status()

@@ -16,6 +16,7 @@
 | [ADR-006](ADR-006-modular-monolith.md) | Modular monolith, not microservices | Accepted · Implemented (structure) |
 | [ADR-007](ADR-007-media-rendering-strategy.md) | Illustrations + camera motion rendered deterministically (Remotion; FFmpeg role pending) | Accepted · Partially implemented |
 | [ADR-008](ADR-008-storage-strategy.md) | Filesystem storage behind an abstraction | Accepted · Partially implemented |
+| [ADR-009](ADR-009-render-asset-resolution.md) | Assets reach the renderer as project-relative keys resolved via a per-render Remotion public dir | Accepted · Partially implemented |
 
 ## How ADRs are used
 

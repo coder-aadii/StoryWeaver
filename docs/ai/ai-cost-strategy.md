@@ -39,7 +39,7 @@ Source metadata, transcripts, normalized transcripts, chunks, embeddings, source
 | Capability | Today |
 | --- | --- |
 | Response/analysis cache | None |
-| Per-call usage record | Structured log only (`provider`, `model`, `duration`, `output_tokens`); note `output_tokens` is masked as `"***"` by the log redactor ([KI-2](../reference/status.md#known-issues-and-limitations)) and nothing is stored in the database |
+| Per-call usage record | Structured log only (`provider`, `model`, `duration`, `output_tokens`); token counts are logged as numbers (previously masked — KI-2, resolved in P0) and nothing is stored in the database |
 | Budgets (per project tokens/images) | None |
 | Prompt version on every artifact | `script_versions.prompt_version` only |
 

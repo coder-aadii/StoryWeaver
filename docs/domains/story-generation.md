@@ -119,7 +119,7 @@ Schema validation, length/beat accounting, provenance links, similarity threshol
 
 ## Current implementation
 
-None beyond `LLMProvider.generate_structured` (validates JSON against a Pydantic model, one retry; tested with fakes only, and only `ValidationError`/`ValueError` are retried — [KI-3](../reference/status.md#known-issues-and-limitations)) and the `scripts`/`script_versions` tables.
+None beyond `LLMProvider.generate_structured` (validates JSON against a Pydantic model, one retry on unusable or invalid output; tested with fakes and mocked HTTP only) and the `scripts`/`script_versions` tables.
 
 ## Planned implementation
 

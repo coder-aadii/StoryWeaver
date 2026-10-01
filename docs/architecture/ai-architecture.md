@@ -14,7 +14,7 @@ Fix the boundary between *AI decisions* and *deterministic code*, and describe t
 
 `apps/api/app/intelligence/`:
 
-- `providers/base.py`: `LLMProvider.generate()` (checks configuration, requires an explicit model, times the call, logs provider/model/duration/tokens, converts `httpx.HTTPError` to `ProviderError`; other malformed-response errors are not wrapped — [KI-3](../reference/status.md#known-issues-and-limitations)) and `generate_structured(prompt, PydanticModel, retries=1)` (appends the JSON Schema to the prompt, extracts JSON from fences/prose, validates with Pydantic, retries once with the validation error, then raises `ProviderError`). `EmbeddingProvider.embed()`.
+- `providers/base.py`: `LLMProvider.generate()` (checks configuration, requires an explicit model, times the call, logs provider/model/duration/tokens, wraps every failure — transport, HTTP status, timeout, empty or malformed reply — into the `ProviderError` family via `provider_errors()`) and `generate_structured(prompt, PydanticModel, retries=1)` (appends the JSON Schema to the prompt, extracts JSON from fences/prose, validates with Pydantic, retries once with the error on an unusable or invalid reply, then raises `ProviderResponseError`). `EmbeddingProvider.embed()` checks configuration and model, wraps errors and verifies the vector count (adapters implement `_embed`).
 - Adapters: `ollama` (LLM + embeddings), `google` (LLM + embeddings), `openai_compatible` → `openrouter`, `grok`, `claude_compatible` (Anthropic Messages API shape, configurable base URL).
 - `registry.py`: `get_llm(name?)`, `get_embeddings(name?)`, `llm_status()` — providers are instantiated lazily per call.
 - Settings: `default_llm_provider` (default `ollama`), `default_llm_model` (empty), per-task models `analysis|story|script|classification`, `embedding_provider`, `embedding_model`.
@@ -66,7 +66,7 @@ Prompt (template + context) → provider → text → JSON extraction → Pydant
 
 ## Failure modes
 
-Provider unconfigured/no model → `ProviderNotConfiguredError`; network/HTTP error (`httpx.HTTPError`) → `ProviderError`; invalid JSON twice → `ProviderError`; a malformed-but-200 response (`KeyError`/`IndexError`/`JSONDecodeError`, e.g. Google returning no `candidates`) escapes unwrapped and is not retried ([KI-3](../reference/status.md#known-issues-and-limitations)); truncated output (token cap) surfaces as invalid JSON. Rate limits are not specially handled (**Planned — not implemented**).
+Provider unconfigured/no model → `ProviderNotConfiguredError`; timeout → `ProviderTimeoutError`; HTTP error (including 429/5xx, with `.status_code`) or transport failure → `ProviderError`; empty, blocked or malformed reply (e.g. Google returning no `candidates`/`parts`) → `ProviderResponseError`; unusable structured output twice → `ProviderResponseError`; truncated output (token cap) surfaces as invalid JSON. Rate limits are not specially handled beyond the status code (**Planned — not implemented**: backoff, fallback).
 
 ## Extension points
 

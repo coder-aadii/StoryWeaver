@@ -12,7 +12,7 @@ Implemented (tooling); conventions are by review.
 - Ruff rules: `E,F,I,UP,B,SIM`; `E501` ignored because the formatter owns line length. FastAPI `Depends`/`Query` are registered as immutable calls for `B008`.
 - Pyright runs in **strict** mode with these relaxed: `reportMissingTypeStubs`, `reportMissingModuleSource`, `reportUnknownMemberType`, `reportUnknownVariableType`, `reportUnknownArgumentType`, `reportUnknownParameterType`, `reportUnknownLambdaType`, `reportMissingParameterType`, `reportUntypedFunctionDecorator` (authoritative list: `[tool.pyright]` in `apps/api/pyproject.toml`). Alembic is excluded.
 - Settings only via `get_settings()`; never read `os.environ` in business code. Model names come from settings, never literals.
-- Never log secrets; `core/logging.py` redacts keys whose name contains key/token/secret/password/authorization/credential (substring match, so it also masks fields like `output_tokens` — [KI-2](../reference/status.md#known-issues-and-limitations)). Redaction does not inspect values or exception text, so still avoid passing secrets.
+- Never log secrets; `core/logging.py` masks keys whose final word is a secret word (`api_key`, `password`, `authorization`, `token`/`access_token`, …) and scrubs secret-shaped substrings in every string, including exception text (previously KI-2, resolved in P0). It is best-effort, so still avoid passing secrets into messages, and never log prompts or request bodies at INFO.
 - Raise the typed errors in `core/errors.py` (`ProviderNotConfiguredError`, `ProviderError`, `UnsafePathError`, `InvalidSourceError`).
 - No `subprocess` with user-controlled strings; use library APIs (yt-dlp Python API) or argument lists.
 - Lazy imports for heavy optional dependencies (`yt_dlp`, `faster_whisper`).

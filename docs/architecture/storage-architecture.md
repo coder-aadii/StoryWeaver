@@ -12,7 +12,7 @@ Separate metadata (queryable, transactional) from binary media (large, streamed)
 
 ## Current implementation
 
-- **Root**: `Settings.storage_root` (default `<repo>/data` **when `STORAGE_ROOT` is unset**; env `STORAGE_ROOT`). Caution: `.env.example` ships `STORAGE_ROOT=` empty, which parses to `.` and so resolves relative to the process working directory — [KI-1](../reference/status.md#known-issues-and-limitations). Directory skeleton tracked via `.gitkeep`: `sources transcripts embeddings images audio music sfx projects renders temporary`. Contents are git-ignored.
+- **Root**: `Settings.storage_root` (default `<repo>/data`; env `STORAGE_ROOT`; an empty or blank value means unset and a relative value resolves against the repository root — previously KI-1, resolved in P0). Directory skeleton tracked via `.gitkeep`: `sources transcripts embeddings images audio music sfx projects renders temporary`. Contents are git-ignored.
 - **`core/storage.py`**:
   - `Storage` protocol: `put(key, BinaryIO) -> (size, sha256)`, `open`, `exists`, `delete`.
   - `LocalStorage`: `path_for(key)` rejects empty keys, leading `/` or `\`, NUL bytes, and any resolved path outside the root (`UnsafePathError`). `put` streams in 1 MiB chunks, hashes while writing, enforces `max_upload_bytes` (default 512 MiB), writes to `<name>.part` then atomically renames.
@@ -43,7 +43,7 @@ Generate → stream to `.part` → hash → rename → update asset row. Reads s
 
 ## Failure modes
 
-Disk full / write error → `.part` removed in `finally`, no partial file visible; oversize upload → a plain `ValueError` (not a typed `StoryWeaverError`, and not mapped to HTTP; an endpoint must map it to 413 — [KI-9](../reference/status.md#known-issues-and-limitations)); traversal attempt → `UnsafePathError`; row without file or file without row → reconcile job **Planned — not implemented** ([operations/recovery](../operations/recovery.md)).
+Disk full / write error → `.part` removed in `finally`, no partial file visible; oversize upload → the typed `FileTooLargeError`, mapped to HTTP 413 `file_too_large` (no route uses `put` yet — [KI-9](../reference/status.md#known-issues-and-limitations)); traversal attempt → `UnsafePathError`; row without file or file without row → reconcile job **Planned — not implemented** ([operations/recovery](../operations/recovery.md)).
 
 ## Extension points
 

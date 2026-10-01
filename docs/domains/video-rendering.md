@@ -70,7 +70,7 @@ Render API/workflow, asset resolution, transitions, audio mixing, progress repor
 
 ## Edge cases
 
-Asset resolution (**Decision pending, [KI-17](../reference/status.md#known-issues-and-limitations)**): nothing serves `data/` over HTTP and `BasicComposition` uses `<Img src>` directly, so how local files reach the renderer (served URL vs Remotion public directory) is undecided; the sample render works only because it has no images. Missing image/audio files; huge frame counts; Chrome download offline (first render needs network); Remotion licence considerations (see README).
+Asset resolution (**decided in [ADR-009](../decisions/ADR-009-render-asset-resolution.md), implementation Planned — [KI-17](../reference/status.md#known-issues-and-limitations)**): project-relative asset keys resolved with Remotion's `staticFile()` against a per-render `--public-dir`; proven with a fixture render (real PNG + WAV). The staging step, `build_timeline` filling `image_src`/`audio_src`, and Timeline v2 are not built. Missing image/audio files; huge frame counts; Chrome download offline (first render needs network); Remotion licence considerations (see README).
 
 ## Open questions
 

@@ -15,7 +15,7 @@
 - **Enums** are lowercase strings (`"draft"`). Unknown value → 422.
 - **Create** (`POST`) returns 201 and the full read model. **Patch** is partial: only sent fields change; unknown fields are rejected (`extra="forbid"` → 422). **Delete** returns 204 with no body.
 - **Read models vs table**: responses include a subset of columns (e.g. no `metadata`, no JSONB `segments`). See each resource doc.
-- **PATCH semantics**: partial update via `exclude_unset`; **an explicit `null` clears a nullable column and yields a misleading 409 on NOT NULL columns**; update schemas have no length limits (over-long value → 500). Details and workaround (omit the field): [errors](errors.md#known-quirks-code-level-documented-as-is), [KI-4](../reference/status.md#known-issues-and-limitations).
+- **PATCH semantics**: partial update via `exclude_unset`; unknown fields → 422; an explicit `null` clears only nullable columns and is a 422 on NOT NULL fields; update schemas have length limits (previously KI-4, resolved in P0). Details: [errors](errors.md#behavior-of-patch).
 - **Server-managed fields** (`id`, timestamps, `version`, `storage_key`, `checksum`, `size_bytes`) cannot be set via the API.
 - **CORS**: allowed origins from `CORS_ORIGINS` (defaults `http://localhost:3000`, `http://localhost:3100`).
 - **Secrets** never appear in responses ([provider-endpoints](provider-endpoints.md)).

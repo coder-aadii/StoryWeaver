@@ -29,7 +29,7 @@ Prompts will be versioned files under `packages/prompts` (Planned); the recorded
 
 ## Structured output, validation, retry
 
-Implemented (mechanism, unit-tested with fakes): `generate_structured(prompt, PydanticModel, model=...)` appends the model's JSON Schema, extracts JSON from fences/prose, validates, and retries once with the validation error. After that it raises `ProviderError`. Only `httpx.HTTPError` is wrapped as `ProviderError`; malformed HTTP-200 responses raise raw `KeyError`/`IndexError`/`JSONDecodeError` and are not retried ([KI-3](../reference/status.md#known-issues-and-limitations)). Details: [structured-output](structured-output.md).
+Implemented (mechanism, unit-tested with fakes and mocked HTTP): `generate_structured(prompt, PydanticModel, model=...)` appends the model's JSON Schema, extracts JSON from fences/prose, validates, and retries once with the error. After that it raises `ProviderResponseError`. Every failure inside `generate` — transport, HTTP status, timeout, empty or malformed reply — surfaces as a `ProviderError` subclass (previously KI-3, resolved in P0). Details: [structured-output](structured-output.md).
 
 ## Cost and quality considerations
 
@@ -40,7 +40,7 @@ Cost: [ai-cost-strategy](ai-cost-strategy.md). Quality: small local models strug
 - No streaming, tool calling, token counting, rate limiting or response caching.
 - Temperature/max_tokens are call parameters with defaults (0.7/2048 for `generate`, 0.2/4096 for `generate_structured`); no per-task tuning exists.
 - Adapter behaviour against real services is unverified. Only the Ollama adapter has a mocked-HTTP test; the others have none.
-- Non-`HTTPError` failures (malformed responses) are not wrapped as `ProviderError` ([KI-3](../reference/status.md#known-issues-and-limitations)).
+- No live-service testing: all provider tests use mocked HTTP; the Google and OpenRouter adapters have had only one minimal manual connectivity check.
 
 ## Current vs future
 

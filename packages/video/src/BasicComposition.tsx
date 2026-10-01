@@ -1,8 +1,26 @@
-import { AbsoluteFill, Audio, Img, Sequence, useCurrentFrame, useVideoConfig } from "remotion";
+import { AbsoluteFill, Audio, Img, Sequence, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 import { cameraTransform } from "./camera";
 import type { Timeline, TimelineScene } from "./types";
 
-const SceneView: React.FC<{ scene: TimelineScene; index: number }> = ({ scene, index }) => {
+/** Maps a timeline asset reference to something the browser/renderer can load. */
+export type AssetResolver = (src: string) => string;
+
+/** Use the reference as given (URLs, data: URIs). This is what the web Player uses. */
+export const rawAsset: AssetResolver = (src) => src;
+
+/**
+ * Resolve project-relative keys (e.g. "images/scene_001.png") against Remotion's public dir via
+ * `staticFile()` (rendered with `--public-dir`). Absolute http(s)://, data: and "/" references are
+ * left untouched. See docs/decisions/ADR-009-render-asset-resolution.md.
+ */
+export const publicDirAsset: AssetResolver = (src) =>
+  /^(https?:|data:|\/)/.test(src) ? src : staticFile(src);
+
+const SceneView: React.FC<{ scene: TimelineScene; index: number; resolve: AssetResolver }> = ({
+  scene,
+  index,
+  resolve,
+}) => {
   const frame = useCurrentFrame(); // relative to the enclosing Sequence
   const { fps } = useVideoConfig();
   const total = Math.max(Math.round(scene.duration * fps), 1);
@@ -19,7 +37,7 @@ const SceneView: React.FC<{ scene: TimelineScene; index: number }> = ({ scene, i
         }}
       >
         {scene.image_src ? (
-          <Img src={scene.image_src} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          <Img src={resolve(scene.image_src)} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
         ) : (
           <div
             style={{
@@ -39,7 +57,7 @@ const SceneView: React.FC<{ scene: TimelineScene; index: number }> = ({ scene, i
           </div>
         )}
       </AbsoluteFill>
-      {scene.audio_src ? <Audio src={scene.audio_src} /> : null}
+      {scene.audio_src ? <Audio src={resolve(scene.audio_src)} /> : null}
       {scene.subtitle ? (
         <AbsoluteFill style={{ justifyContent: "flex-end", alignItems: "center", paddingBottom: 72 }}>
           <div
@@ -62,19 +80,28 @@ const SceneView: React.FC<{ scene: TimelineScene; index: number }> = ({ scene, i
   );
 };
 
-export const BasicComposition: React.FC<Timeline> = ({ scenes, fps }) => (
-  <AbsoluteFill style={{ background: "black" }}>
-    {scenes.map((scene, i) => (
-      <Sequence
-        key={scene.scene_id}
-        from={Math.round(scene.start * fps)}
-        durationInFrames={Math.max(Math.round(scene.duration * fps), 1)}
-      >
-        <SceneView scene={scene} index={i} />
-      </Sequence>
-    ))}
-  </AbsoluteFill>
-);
+export function createComposition(resolve: AssetResolver): React.FC<Timeline> {
+  const Composition: React.FC<Timeline> = ({ scenes, fps }) => (
+    <AbsoluteFill style={{ background: "black" }}>
+      {scenes.map((scene, i) => (
+        <Sequence
+          key={scene.scene_id}
+          from={Math.round(scene.start * fps)}
+          durationInFrames={Math.max(Math.round(scene.duration * fps), 1)}
+        >
+          <SceneView scene={scene} index={i} resolve={resolve} />
+        </Sequence>
+      ))}
+    </AbsoluteFill>
+  );
+  return Composition;
+}
+
+/** Player/preview composition: asset references are used as given. */
+export const BasicComposition = createComposition(rawAsset);
+
+/** Render composition for the asset-path spike: references resolve through `staticFile()`. */
+export const AssetComposition = createComposition(publicDirAsset);
 
 export function timelineDurationInFrames(t: Timeline): number {
   const end = t.scenes.reduce((m, s) => Math.max(m, s.start + s.duration), 0);

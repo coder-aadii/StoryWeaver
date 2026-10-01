@@ -67,7 +67,7 @@ New composition ([development/adding-a-remotion-composition](../development/addi
 
 ## Current limitations
 
-- The Python `Timeline` and the zod schema are mirrored by hand and already differ (`camera` required in zod, `shot` a free string) — [KI-7](../reference/status.md#known-issues-and-limitations).
+- The Python `Timeline` and the zod schema are mirrored by hand but checked against shared sample documents by tests in both languages ([KI-7](../reference/status.md#known-issues-and-limitations), mitigated in P0).
 - `estimate_duration` is a word-count heuristic clamped to 2–7 s: narration needing longer is truncated to 7 s, so it must not drive a final render — [KI-16](../reference/status.md#known-issues-and-limitations). `build_timeline` leaves `image_src`/`audio_src` empty.
 - Nothing serves `data/` files to the Player or renderer — [KI-17](../reference/status.md#known-issues-and-limitations).
 - No audio is rendered in the sample; system FFmpeg is **not** required for rendering (Remotion bundles its own encoder), and no StoryWeaver code invokes FFmpeg directly.

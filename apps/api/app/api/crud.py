@@ -3,12 +3,13 @@
 import uuid
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
+from fastapi import APIRouter, Depends, Query, Response, status
 from pydantic import BaseModel
 from sqlalchemy import select
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import DataError, IntegrityError
 from sqlalchemy.orm import Session
 
+from app.api.errors import ApiError
 from app.db.session import get_db
 
 
@@ -26,7 +27,7 @@ def crud_router(
     def get_or_404(db: Session, item_id: uuid.UUID) -> Any:
         obj = db.get(model, item_id)
         if obj is None:
-            raise HTTPException(status.HTTP_404_NOT_FOUND, f"{tag} not found")
+            raise ApiError(status.HTTP_404_NOT_FOUND, "not_found", f"{tag} not found")
         return obj
 
     def commit(db: Session) -> None:
@@ -34,7 +35,20 @@ def crud_router(
             db.commit()
         except IntegrityError as exc:
             db.rollback()
-            raise HTTPException(status.HTTP_409_CONFLICT, "conflict or invalid reference") from exc
+            sqlstate = getattr(exc.orig, "sqlstate", None)
+            code, message = {
+                "23505": ("duplicate", "a record with these unique values already exists"),
+                "23503": ("invalid_reference", "a referenced record does not exist"),
+                "23502": ("missing_value", "a required value is missing"),
+            }.get(sqlstate or "", ("conflict", "conflicting or invalid data"))
+            raise ApiError(status.HTTP_409_CONFLICT, code, message) from exc
+        except DataError as exc:
+            db.rollback()
+            raise ApiError(
+                status.HTTP_422_UNPROCESSABLE_CONTENT,
+                "invalid_value",
+                "a value is too long or malformed",
+            ) from exc
 
     @router.get("", response_model=list[read])
     def list_items(

@@ -1,0 +1,10 @@
+{
+  "scenes": [
+    {
+      "scene_id": "s",
+      "start": 0,
+      "duration": 1
+    }
+  ],
+  "fps": 29.97
+}

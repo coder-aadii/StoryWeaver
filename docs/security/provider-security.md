@@ -8,7 +8,7 @@ Partially implemented. Isolation, timeouts and key handling exist; retries/backo
 
 ## Principles
 
-1. **Isolated:** only provider adapters perform provider HTTP. Business logic uses `generate`/`generate_structured`/`embed` ([provider architecture](../architecture/provider-architecture.md)). A transport or HTTP-status failure (`httpx.HTTPError`) surfaces as `ProviderError`, and an unset provider as `ProviderNotConfiguredError`; response bodies are not logged. **This wrapping is limited:** a malformed but HTTP-200 response (missing `choices`/`candidates`/`content`, e.g. a safety-blocked Google reply) raises an unwrapped `KeyError`/`IndexError`/`JSONDecodeError`, and `generate_structured` retries only validation errors, so such failures abort without retry ([KI-3](../reference/status.md#known-issues-and-limitations)). Callers must not assume every provider failure is a `ProviderError`.
+1. **Isolated:** only provider adapters perform provider HTTP. Business logic uses `generate`/`generate_structured`/`embed` ([provider architecture](../architecture/provider-architecture.md)). Every failure inside a provider call surfaces as a `ProviderError` subclass — `ProviderTimeoutError`, `ProviderResponseError` (empty, blocked, malformed or non-JSON replies) or plain `ProviderError` with a `status_code` — and an unset provider as `ProviderNotConfiguredError`; messages carry only the provider name, exception type and HTTP status, never URLs, headers or response bodies (previously KI-3, resolved in P0). This is verified with a shared mocked-HTTP contract suite, not against live services.
 2. **Timeout-controlled:** adapter clients use a 120 s timeout (`http_client`); readiness probes use 2 s. Per-call timeout configuration: Planned.
 3. **Validated:** model output is untrusted. `generate_structured` extracts JSON and validates it with the Pydantic schema; invalid output is retried once with the validation error, then fails. Never `eval`, never pass model output to a shell, SQL string or file path unvalidated.
 4. **Retryable:** structured-output retry exists. Network retry with backoff, provider fallback chains and circuit breaking are Planned — not implemented ([retry and recovery](../workflows/retry-and-recovery.md)).
@@ -20,7 +20,7 @@ Transcripts and other source material are **untrusted input**. They may contain 
 
 ## Logging of provider calls
 
-The `llm.generated` event is redacted by key name, which masks `output_tokens` ([KI-2](../reference/status.md#known-issues-and-limitations)); and the workflow runner logs exception text unscrubbed ([KI-2](../reference/status.md#known-issues-and-limitations)), so a provider error message that echoed a secret would reach the logs. Adapters send keys in headers and never interpolate them into messages.
+The `llm.generated` event logs `provider`, `model`, `duration`, `output_tokens` and `status`; log redaction masks secret-named keys and scrubs secret-shaped values in all strings, including the exception text the workflow runner logs (previously KI-2, resolved in P0). Redaction is best-effort, so a provider error that echoed a secret in an unusual format could still reach the logs. Adapters send keys in headers and never interpolate them into messages.
 
 ## Egress and configuration
 

@@ -23,4 +23,4 @@ Browser: normally `pnpm --filter @storyweaver/web exec playwright install chromi
 
 ## Not covered
 
-Creating a project through the UI, error states when the API is down, Player playback, responsive layout. Test data is not isolated: tests run against whatever database the API uses — do not point them at data you care about. The `pnpm dev` web server they start binds beyond localhost ([KI-20](../reference/status.md#known-issues-and-limitations)).
+Creating a project through the UI, error states when the API is down, Player playback, responsive layout. Test data is not isolated: tests run against whatever database the API uses — do not point them at data you care about. The `pnpm dev` web server they start binds to `127.0.0.1`.

@@ -24,7 +24,7 @@ pytest, Vitest for web and video (counts and the skip behavior without a databas
 
 ## Not enforced
 
-Coverage thresholds, dependency audit, secret scanning, link-checking of `docs/`, schema/contract drift, performance budgets, CI. Adding CI is Decision pending.
+Coverage thresholds, dependency audit, secret scanning, link-checking of `docs/`, performance budgets, CI. The Python↔zod timeline contract is covered by `make test` (shared samples). Adding CI is Decision pending.
 
 ## Manual documentation check (not automated)
 

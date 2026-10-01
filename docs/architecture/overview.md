@@ -91,7 +91,7 @@ New LLM provider ([development/adding-a-provider](../development/adding-a-provid
 - No workflow is implemented end to end; the API has CRUD only.
 - No real image or voice generation; no render workflow (rendering today is a manual CLI command on a sample timeline).
 - Provider adapters have not been exercised against real services; only Ollama's chat request has an (HTTP-mocked) test; embedding adapters and the other LLM adapters have none.
-- Further code-level limitations are tracked once in [reference/status → Known issues](../reference/status.md#known-issues-and-limitations) (for example unwired `LocalStorage`/`LocalRunner` [KI-9](../reference/status.md#known-issues-and-limitations), unmapped domain errors [KI-8](../reference/status.md#known-issues-and-limitations), timeline contract drift [KI-7](../reference/status.md#known-issues-and-limitations), no asset serving [KI-17](../reference/status.md#known-issues-and-limitations)).
+- Further code-level limitations are tracked once in [reference/status → Known issues](../reference/status.md#known-issues-and-limitations) (for example unwired `LocalStorage`/`LocalRunner` [KI-9](../reference/status.md#known-issues-and-limitations), residual timeline-contract gaps [KI-7](../reference/status.md#known-issues-and-limitations), no asset serving [KI-17](../reference/status.md#known-issues-and-limitations)). Defects fixed in P0 are kept there as history.
 
 ## Future evolution
 

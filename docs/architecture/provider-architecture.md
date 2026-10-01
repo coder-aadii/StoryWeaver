@@ -59,7 +59,7 @@ Same interfaces; concrete additions chosen later: Piper/Kokoro/XTTS-class TTS, c
 
 ### Required properties of every provider call (Target)
 
-Observable (logged with provider/model/duration/status), retryable, timeout-controlled, output-validated, isolated and replaceable. A provider failure **must not corrupt project state**: results are written only after validation, and failures are recorded on the failing entity. Fallback between providers must happen *behind* the interface so business logic never couples to a provider API. Implemented today: logging, a fixed timeout, output validation (structured generation), and normalisation of `httpx.HTTPError` only — other malformed-response errors escape unwrapped ([KI-3](../reference/status.md#known-issues-and-limitations)). Retry/backoff, fallback and per-call isolation beyond exception handling are **Planned — not implemented**.
+Observable (logged with provider/model/duration/status), retryable, timeout-controlled, output-validated, isolated and replaceable. A provider failure **must not corrupt project state**: results are written only after validation, and failures are recorded on the failing entity. Fallback between providers must happen *behind* the interface so business logic never couples to a provider API. Implemented today: logging, a configurable timeout (`LLM_TIMEOUT_SECONDS`), output validation (structured generation), and normalisation of every failure into the `ProviderError` family without URLs, headers or bodies (previously KI-3, resolved in P0). Retry/backoff, fallback and persisted failure state are **Planned — not implemented**.
 
 ## Components and responsibilities
 
@@ -71,7 +71,7 @@ Service → `get_llm()` → provider instance → `generate()` → vendor HTTP �
 
 ## Failure modes
 
-Not configured → `ProviderNotConfiguredError`; transport/HTTP failure (`httpx.HTTPError`) → `ProviderError`; a malformed 200 response (`KeyError`/`IndexError`/`JSONDecodeError`) is **not** wrapped and `generate_structured` does not retry it ([KI-3](../reference/status.md#known-issues-and-limitations)); unknown name → `ProviderNotConfiguredError`. Providers are cheap to construct; a failing provider never affects startup.
+Not configured or no model → `ProviderNotConfiguredError`; timeout → `ProviderTimeoutError`; HTTP-status or transport failure → `ProviderError` (with `.status_code`); empty, blocked or malformed reply → `ProviderResponseError`, which `generate_structured` retries once; unknown name → `ProviderNotConfiguredError`. Providers are cheap to construct; a failing provider never affects startup.
 
 ## Extension points
 
@@ -83,7 +83,7 @@ Not configured → `ProviderNotConfiguredError`; transport/HTTP failure (`httpx.
 - `is_configured()` for Ollama is true whenever its base URL is non-empty (default `http://localhost:11434`), which does **not** mean the server is reachable — use `/health/providers.ollama_reachable`.
 - No provider registry for image/voice/transcription (single factory functions).
 - Timeout is fixed (120 s); no retry/backoff on transient errors.
-- Domain errors (`ProviderNotConfiguredError`, …) are not mapped to HTTP statuses ([KI-8](../reference/status.md#known-issues-and-limitations)); setting `COMFYUI_BASE_URL` swaps the working mock for the raising stub ([KI-18](../reference/status.md#known-issues-and-limitations)).
+- Domain errors are mapped to HTTP statuses with stable codes by `api/errors.py` (previously KI-8, resolved in P0); setting `COMFYUI_BASE_URL` swaps the working mock for the raising stub ([KI-18](../reference/status.md#known-issues-and-limitations)).
 
 ## Future evolution
 

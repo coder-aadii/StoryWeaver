@@ -1,0 +1,13 @@
+{
+  "scenes": [
+    {
+      "scene_id": "s",
+      "start": 0,
+      "duration": 1,
+      "camera": {
+        "shot": "wide",
+        "movement": "spin"
+      }
+    }
+  ]
+}

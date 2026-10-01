@@ -16,7 +16,7 @@ select(TranscriptChunk).order_by(TranscriptChunk.embedding.cosine_distance(vec))
 
 ## Dimension is fixed
 
-`EMBEDDING_DIM = 768` is a constant in `models/domain.py` and is baked into the `vector(768)` column by the migration. `Settings.embedding_dimensions` (default 768, env `EMBEDDING_DIMENSIONS`) is an **independent, unchecked** value: changing it does not change the column, and nothing compares it with `EMBEDDING_DIM` or with what a provider returns, so a mismatched model fails at insert time ([KI-6](../reference/status.md#known-issues-and-limitations)). A model with a different output size requires a migration (and re-embedding). Mixed models in one column are unsafe — filter on `embedding_model` or re-embed ([ai/embeddings](../ai/embeddings.md)).
+`EMBEDDING_DIM = 768` is a constant in `models/domain.py` and is baked into the `vector(768)` column by the migration. `Settings.embedding_dimensions` (default 768, env `EMBEDDING_DIMENSIONS`) is an **independent, unchecked** value: changing it does not change the column, and nothing compares it with `EMBEDDING_DIM` or with what a provider returns at runtime (a unit test only checks that the two defaults agree), so a mismatched model fails at insert time ([KI-6](../reference/status.md#known-issues-and-limitations)). A model with a different output size requires a migration (and re-embedding). Mixed models in one column are unsafe — filter on `embedding_model` or re-embed ([ai/embeddings](../ai/embeddings.md)).
 
 ## Providers (implemented, untested)
 

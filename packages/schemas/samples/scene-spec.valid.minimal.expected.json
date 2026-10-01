@@ -1,0 +1,22 @@
+{
+  "scene_id": "scene_001",
+  "sequence": 1,
+  "narration": "Hello.",
+  "duration": null,
+  "visual_intent": "",
+  "characters": [],
+  "locations": [],
+  "objects": [],
+  "action": "",
+  "emotion": "",
+  "camera": {
+    "shot": "medium",
+    "movement": "static"
+  },
+  "image_prompt": "",
+  "negative_prompt": "",
+  "voice": null,
+  "music": null,
+  "sfx": [],
+  "subtitle": null
+}

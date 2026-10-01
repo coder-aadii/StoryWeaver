@@ -12,7 +12,7 @@ Implemented (conventions and ignore rules); no secrets manager.
 - Keys: `GOOGLE_AI_API_KEY`, `GROK_API_KEY`, `OPENROUTER_API_KEY`, `ANTHROPIC_API_KEY`; DB password inside `DATABASE_URL`; MinIO password for the optional profile. Full table: [environment reference](../reference/environment-reference.md); handling guidance: [environment variables](../operations/environment-variables.md).
 - Never put secrets in `NEXT_PUBLIC_*` variables (they are shipped to the browser).
 - Send keys in headers (`Authorization`, `x-api-key`, `x-goog-api-key`), not URLs, so they do not land in access logs or exceptions. Adapters follow this.
-- Never log keys; redaction is key-name based (substring match on the field name), so do not interpolate secrets into message strings, and remember that exception text logged by the workflow runner is not scrubbed ([KI-2](../reference/status.md#known-issues-and-limitations)).
+- Never log keys; redaction masks secret-named keys (final word `key`/`token`/`secret`/`password`/`authorization`/`credential`) and scrubs secret-shaped substrings in every string, including exception text, but it is best-effort — still avoid interpolating secrets into message strings (previously KI-2, resolved in P0).
 - Compose defaults (`storyweaver/storyweaver`) are for localhost only; change them if the DB port is ever reachable beyond loopback (it binds `127.0.0.1`).
 
 ## Verification done

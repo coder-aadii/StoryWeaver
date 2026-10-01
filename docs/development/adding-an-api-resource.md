@@ -26,8 +26,8 @@ Resources needing validation across fields, upload handling, workflow triggers, 
 
 ## Known gaps in the generic CRUD
 
-- **PATCH semantics ([KI-4](../reference/status.md#known-issues-and-limitations)):** `PATCH` applies only fields that were sent (`exclude_unset`), but an explicit `null` clears a nullable column and, on a NOT NULL column, raises an integrity error that the factory reports as a misleading `409`. Update schemas have **no length limits** (create schemas do), so an over-long string reaches the database and returns `500`. Add `max_length`/`min_length` and non-null constraints to new `*Update` schemas.
-- Typed `StoryWeaverError`s are not mapped to HTTP statuses ([KI-8](../reference/status.md#known-issues-and-limitations)).
+- **PATCH semantics:** `PATCH` applies only fields that were sent (`exclude_unset`). Give every `*Update` schema `min_length`/`max_length` limits and list the columns that may be cleared in `nullable_fields` (the `_Patch` base rejects `null` for everything else with a 422). Previously KI-4, resolved in P0.
+- Typed `StoryWeaverError`s raised in a route are mapped to HTTP statuses with a stable `code` by `install_exception_handlers`; expected client-visible failures can raise `ApiError(status, code, message)` (previously KI-8, resolved in P0). Add a mapping row in `api/errors.py` for any new error class.
 - No total count/pagination metadata, no filtering/sorting parameters, no auth, no optimistic concurrency, no endpoints for join tables (`collection_videos`, `project_sources`) or for `script_versions`/`scene_versions`. See [API conventions](../api/API-conventions.md).
 
 > Working as an AI coding agent? Read [AI agent guide](ai-agent-guide.md) first.

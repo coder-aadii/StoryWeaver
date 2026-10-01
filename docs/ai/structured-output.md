@@ -15,7 +15,7 @@
 3. `extract_json` strips Markdown code fences and surrounding prose, taking the span from the first `{` to the last `}`. Arrays at top level are not supported — wrap them in an object.
 4. `schema.model_validate_json` validates.
 5. On `ValidationError`/`ValueError`, retries up to `retries` more times, appending "Fix this error: <first 500 chars>" to the prompt. After exhaustion raises `ProviderError`.
-6. **Not covered:** errors raised inside `generate` that are not `httpx.HTTPError` (e.g. `KeyError` from an unexpected response shape, `JSONDecodeError` from the HTTP layer) are not caught here and abort the call with no retry ([KI-3](../reference/status.md#known-issues-and-limitations)).
+6. **Unusable replies:** an empty reply, a blocked reply (e.g. Google safety block, or a reasoning model that spent its whole token budget) or a malformed one raises `ProviderResponseError` inside `generate`; `generate_structured` treats it like invalid output — it retries once and then raises `ProviderResponseError` (previously KI-3, resolved in P0). Transport and HTTP-status failures are not retried here: they propagate as `ProviderError`/`ProviderTimeoutError` (backoff is **Planned — not implemented**).
 
 Tests ([`test_units.py`](../../apps/api/tests/test_units.py)): retry-then-success and give-up (both with a fake `LLMProvider` subclass), and JSON extraction from prose. The only HTTP-level adapter test is for Ollama; Google, OpenRouter, Grok and Claude-compatible adapters have no tests.
 

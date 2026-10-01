@@ -34,9 +34,9 @@ DB-backed tests (`test_api.py`, `test_models.py`, and `test_ready_with_database`
 | Docker Compose (unverified) | `postgresql+psycopg://storyweaver:storyweaver@localhost:5433/storyweaver_test` (create the database first) |
 | Docker-free helper (verified) | the second URL printed by `make db-up-nodocker`: `postgresql+psycopg://postgres@/storyweaver_test?host=<repo>/data/temporary/pgdata` |
 
-> **Destructive ([KI-19](../reference/status.md#known-issues-and-limitations)).** On first use the fixture runs `alembic downgrade base` then `upgrade head`, and it truncates every table after each test. Nothing checks that the URL is a throwaway database. Never point it at `storyweaver` or any database with data you want. Without the variable DB tests are skipped (not failed), so a green run can mean they never ran.
+> **Destructive, but guarded.** On first use the fixture runs `alembic downgrade base` then `upgrade head`, and it truncates every table after each test. Before any DDL it refuses a `TEST_DATABASE_URL` whose database name does not end in `_test` (override: `STORYWEAVER_ALLOW_DESTRUCTIVE_TESTS=1`) or that equals the application's `DATABASE_URL` (`tests/db_safety.py`; previously KI-19). Use a throwaway database anyway — all its data is destroyed. Without the variable DB tests are skipped (not failed), so a green run can mean they never ran.
 >
-> Isolation caveat ([KI-11](../reference/status.md#known-issues-and-limitations)): the fixture clears the settings cache but not the cached engine, so test order matters.
+> Isolation: the whole test session overrides `DATABASE_URL` and provider keys in the environment and resets the cached settings/engine/sessionmaker around the DB fixtures, so results do not depend on test order (previously KI-11, resolved in P0). Run a single test with `uv run pytest tests/test_api.py::test_project_crud_roundtrip`.
 
 ## Writing tests
 

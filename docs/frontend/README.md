@@ -27,8 +27,8 @@ Related: [../architecture/frontend-architecture.md](../architecture/frontend-arc
 
 ## Configuration and exposure notes
 
-- `NEXT_PUBLIC_API_URL` must be set in `apps/web/.env.local` (or the shell): Next.js reads env files from `apps/web/`, so the repository-root `.env` does **not** reach the web app ([KI-21](../reference/status.md#known-issues-and-limitations)). It is inlined at build time and is browser-visible, so it must never contain secrets.
-- `next dev` binds beyond localhost (it prints a LAN address), so the "do not expose beyond localhost" guidance applies to the web dev server as well as the API ([KI-20](../reference/status.md#known-issues-and-limitations)).
+- `NEXT_PUBLIC_API_URL` must be set in `apps/web/.env.local` (or the shell; example in `apps/web/.env.example`): Next.js reads env files from `apps/web/`, so the repository-root `.env` does **not** reach the web app. It is inlined at build time and is browser-visible, so it must never contain secrets.
+- The web `dev`/`start` scripts bind to `127.0.0.1` (`-H 127.0.0.1`; previously KI-20, resolved in P0) and the API allows the `http://localhost:3100` and `http://127.0.0.1:3100` origins. The API has no authentication, so the "do not expose beyond localhost" guidance still applies to both.
 - `next/font/google` downloads fonts at dev/build time, so a first build needs network access ([KI-25](../reference/status.md#known-issues-and-limitations)).
 - The API client does not parse FastAPI's `detail`/validation body; UI errors show only `<status> <statusText>` ([data-fetching](data-fetching.md)).
 

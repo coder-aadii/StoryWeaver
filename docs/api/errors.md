@@ -1,31 +1,40 @@
 # API Errors
 
-> Error shapes and status codes the API actually returns.
+> Error shapes, status codes and stable machine codes the API returns.
 
 ## Status
 
-**Implemented** (FastAPI defaults plus two custom cases).
+**Implemented.** Domain and database errors share one body shape, `{"detail": <message>, "code": <stable code>}` (added in P0, previously KI-8). FastAPI's own request-validation errors (422) keep FastAPI's default shape.
 
-| Status | When | Body |
-| --- | --- | --- |
-| 200/201/204 | success (204 for delete) | resource / none |
-| 404 | `GET/PATCH/DELETE /X/{id}` for a missing row | `{"detail":"projects not found"}` (message uses the route tag: `channels`, `sources`, `transcripts`, `topics`, `collections`, `projects`, `scripts`, `scenes`, `assets`, `renders`) |
-| 409 | unique violation (duplicate `(platform, external_id)`, topic slug, collection name, `(source_video_id, version)`…) **or** foreign key to a non-existent row | `{"detail":"conflict or invalid reference"}` |
-| 422 | invalid body/query/path: wrong type, unknown enum, bad UUID, `limit` outside 1–200, unknown PATCH field, bad topic slug pattern, empty required string | FastAPI validation list: `{"detail":[{"loc":[...],"msg":"...","type":"..."}]}` |
-| 503 | `GET /health/ready` when DB or pgvector missing | `{"status":"not_ready","database":bool,"pgvector":bool}` |
-| 500 | unhandled errors: database unreachable on a CRUD call; a `PATCH` value longer than the column allows (the `*Update` schemas have no length limits, so the database rejects it with a `DataError`, which `crud.py` does not catch); any `StoryWeaverError` raised inside a route (not mapped to a status, [KI-8](../reference/status.md#known-issues-and-limitations)) | FastAPI default `{"detail":"Internal Server Error"}` |
+| Status | `code` | When | Body |
+| --- | --- | --- | --- |
+| 200/201/204 | — | success (204 for delete) | resource / none |
+| 404 | `not_found` | `GET/PATCH/DELETE /X/{id}` for a missing row | `{"detail":"projects not found","code":"not_found"}` (message uses the route tag: `channels`, `sources`, `transcripts`, `topics`, `collections`, `projects`, `scripts`, `scenes`, `assets`, `renders`) |
+| 409 | `duplicate` | unique violation (duplicate `(platform, external_id)`, topic slug, collection name, `(source_video_id, version)`…) | `{"detail":"a record with these unique values already exists","code":"duplicate"}` |
+| 409 | `invalid_reference` | foreign key to a non-existent row | `{"detail":"a referenced record does not exist","code":"invalid_reference"}` |
+| 409 | `missing_value` / `conflict` | NOT NULL violation / any other integrity error | `code` is `missing_value` or `conflict` |
+| 409 | `provider_not_configured` | a route used a provider that is not configured (none does today) | domain-error handler |
+| 422 | — (FastAPI shape) | invalid body/query/path: wrong type, unknown enum, bad UUID, `limit` outside 1–200, unknown PATCH field, **`null` for a required field**, over-long string, bad topic slug, invalid URL on create | `{"detail":[{"type":"…","loc":[...],"msg":"…","input":…}]}` |
+| 422 | `invalid_value` | the database rejected a value as too long/malformed (`DataError`) after validation | `{"detail":"a value is too long or malformed","code":"invalid_value"}` |
+| 422 | `invalid_source` | `InvalidSourceError` raised inside a route (none does today) | domain-error handler |
+| 400 / 413 | `unsafe_path` / `file_too_large` | `UnsafePathError` / `FileTooLargeError` raised inside a route (no upload route exists yet) | domain-error handler |
+| 502 / 504 | `provider_error`, `provider_bad_response` / `provider_timeout` | a provider call failed, returned an unusable reply, or timed out (no route calls a provider yet) | domain-error handler |
+| 503 | — | `GET /health/ready` when the DB or pgvector is unavailable | `{"status":"not_ready","database":bool,"pgvector":bool,"error":"<ExceptionType>"}` (type only; details are in the log) |
+| 500 | `internal_error` | any other `StoryWeaverError` raised inside a route (generic message, no details); other unhandled errors give FastAPI's default `{"detail":"Internal Server Error"}` | |
 
-409 is deliberately generic: the database error text is not leaked, and the same message covers duplicates and bad references. Callers cannot tell them apart from the response alone.
+Messages never contain database error text, SQL, URLs, headers or provider response bodies. Duplicate and bad-reference conflicts are now distinguished by `code`, derived from the PostgreSQL error class.
 
-## Known quirks (code-level, documented as-is)
+## Behavior of `PATCH`
 
-- **Explicit `null` in a `PATCH`.** `crud.py` applies `model_dump(exclude_unset=True)`, and the update schemas allow `None`. Sending `{"description": null}` **clears** a nullable column. Sending `{"title": null}` or `{"status": null}` on a NOT NULL column reaches the database, raises an integrity error, and is reported as the generic **409** `conflict or invalid reference` — which is misleading (it is neither a duplicate nor a bad reference). To leave a field unchanged, omit it. See [KI-4](../reference/status.md#known-issues-and-limitations).
-- **No length limits on `PATCH`.** Create schemas bound string lengths (e.g. `title` 1–512); update schemas do not, so an over-long value returns **500** rather than 422.
-- **Typed domain errors are not mapped.** `ProviderNotConfiguredError`, `UnsafePathError`, `InvalidSourceError` etc. have no exception handler ([KI-8](../reference/status.md#known-issues-and-limitations)). No current route raises them.
+- Only fields that were sent are applied (`exclude_unset`); unknown fields are rejected (422).
+- An explicit `null` **clears** a nullable column (`description` on projects, topics, collections and source videos; `video_count` on channels; `text` on transcripts). `null` on any NOT NULL field (for example `title`, `status`, `name`) is rejected with **422** (`'title' cannot be null`). To leave a field unchanged, omit it. (Previously a misleading 409 — KI-4, resolved in P0.)
+- Update schemas carry length limits (for example `title` 1–512), so an over-long value is a 422 validation error rather than a database failure.
 
-## Not implemented
+## Known limits
 
-Error codes/machine-readable `code` field, problem+json, per-field conflict reporting, request IDs. A DB outage currently yields 500 rather than 503 on CRUD routes.
+- FastAPI's validation 422 echoes the offending `input` back in its body; do not send secrets in request bodies you expect to log.
+- A database outage on a CRUD call surfaces as an unhandled 500 rather than 503 (only `/health/ready` reports it as 503).
+- Not implemented: problem+json, per-field conflict reporting, request IDs.
 
 ## Error persistence for jobs
 
@@ -37,14 +46,20 @@ Related: [API-conventions](API-conventions.md)
 
 ```http
 GET /api/v1/projects/3f2c0000-0000-0000-0000-000000000000  → 404
-{"detail":"projects not found"}
+{"detail":"projects not found","code":"not_found"}
 
 POST /api/v1/sources  (same platform + external_id twice)   → 409
-{"detail":"conflict or invalid reference"}
+{"detail":"a record with these unique values already exists","code":"duplicate"}
 
-PATCH /api/v1/projects/{id}  {"status":"nope"}              → 422
-{"detail":[{"type":"enum","loc":["body","status"],"msg":"Input should be 'draft', 'analyzing', ...","input":"nope","ctx":{"expected":"'draft', 'analyzing', ..."}}]}
+POST /api/v1/scenes  {"project_id":"<unknown uuid>","sequence":1}  → 409
+{"detail":"a referenced record does not exist","code":"invalid_reference"}
 
-PATCH /api/v1/projects/{id}  {"title":null}                 → 409   (NOT NULL column, see quirks)
-{"detail":"conflict or invalid reference"}
+PATCH /api/v1/projects/{id}  {"title":null}                 → 422
+{"detail":[{"type":"value_error","loc":["body"],"msg":"Value error, 'title' cannot be null","input":{"title":null},"ctx":{"error":{}}}]}
+
+PATCH /api/v1/projects/{id}  {"title":"<600 characters>"}   → 422
+{"detail":[{"type":"string_too_long","loc":["body","title"],"msg":"String should have at most 512 characters", …}]}
+
+POST /api/v1/sources  {"url":"https://evil.example/x", …}   → 422
+{"detail":[{"type":"value_error","loc":["body"],"msg":"Value error, not a YouTube URL", …}]}
 ```

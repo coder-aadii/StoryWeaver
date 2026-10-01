@@ -4,7 +4,7 @@
 
 ## Status
 
-Planned — not implemented. StoryWeaver is local-first and has no authentication; **do not expose the API or web app beyond localhost**. Note that `next dev` binds beyond localhost by default (it prints a LAN address), so the web dev server is reachable from the local network unless you bind it to `127.0.0.1` (for example `next dev -H 127.0.0.1`) ([KI-20](../reference/status.md#known-issues-and-limitations)).
+Planned — not implemented. StoryWeaver is local-first and has no authentication; **do not expose the API or web app beyond localhost**. The supported commands bind both dev servers to `127.0.0.1` (`make dev-api` passes `--host 127.0.0.1`; the web scripts pass `-H 127.0.0.1`); running them by hand with another host re-opens the exposure.
 
 ## Today
 

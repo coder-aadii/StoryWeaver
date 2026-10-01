@@ -58,7 +58,7 @@ Implement `WorkflowRunner` for Temporal; register activities as plain functions;
 
 ## Current limitations
 
-See above: no persistence, cancellation, progress, locking or callers ([KI-9](../reference/status.md#known-issues-and-limitations)). `max_workers=2` is a fixed constant. The runner logs `error="<Type>: <message>"`; exception text is not scrubbed by the key-name redactor ([KI-2](../reference/status.md#known-issues-and-limitations)).
+See above: no persistence, cancellation, progress, locking or callers ([KI-9](../reference/status.md#known-issues-and-limitations)). `max_workers=2` is a fixed constant. The runner logs `error="<Type>: <message>"`; the log processor scrubs secret-shaped substrings in that text (best-effort).
 
 ## Future evolution
 

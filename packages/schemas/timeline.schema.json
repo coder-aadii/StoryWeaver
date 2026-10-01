@@ -34,7 +34,7 @@
       "type": "object"
     },
     "TimelineScene": {
-      "description": "A scene with resolved timing and resolved asset URLs \u2014 the Remotion input.",
+      "description": "A scene with resolved timing and resolved asset URLs — the Remotion input.",
       "properties": {
         "scene_id": {
           "title": "Scene Id",

@@ -35,7 +35,7 @@
 
 For each CRUD group `X`: `GET /X` (list), `GET /X/{id}`, `POST /X` (201), `PATCH /X/{id}`, `DELETE /X/{id}` (204). Implemented once in `apps/api/app/api/crud.py` ([adding-an-api-resource](../development/adding-an-api-resource.md)).
 
-Constraints and quirks of the generic contract (explicit-`null` PATCH, no length limits on updates, single-UUID-key tables only, no filters/`PUT`/nesting): [API-conventions](API-conventions.md), [errors](errors.md), [KI-4](../reference/status.md#known-issues-and-limitations).
+Constraints of the generic contract (explicit `null` only clears nullable columns and is a 422 elsewhere, length limits on updates, single-UUID-key tables only, no filters/`PUT`/nesting): [API-conventions](API-conventions.md), [errors](errors.md).
 
 ### Sample response (`POST /projects` → 201)
 

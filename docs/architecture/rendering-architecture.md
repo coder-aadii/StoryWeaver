@@ -52,8 +52,8 @@ Add compositions in `Root.tsx` ([development/adding-a-remotion-composition](../d
 ## Current limitations
 
 - Camera motion is a fixed 12 % scale / ±3 % translate path per movement, not parameterised by intensity (the target scene design has `intensity`; the schema does not).
-- Image `src` must be a URL/static file reachable by the Remotion bundler; no resolver from `assets` rows, and nothing serves `data/` files — how a render receives asset URLs is **Decision pending** ([KI-17](../reference/status.md#known-issues-and-limitations)).
-- The zod timeline schema and the Python model differ (`camera` required vs default; `shot` free string vs fixed set) and are not checked against each other ([KI-7](../reference/status.md#known-issues-and-limitations)); `estimate_duration` truncates long narration to 7 s ([KI-16](../reference/status.md#known-issues-and-limitations)).
+- Asset references: the decided mechanism ([ADR-009](../decisions/ADR-009-render-asset-resolution.md)) is project-relative keys resolved with `staticFile()` against a per-render `--public-dir` (proven on a fixture); there is still no resolver from `assets` rows, no staging step, and nothing serves `data/` files over HTTP ([KI-17](../reference/status.md#known-issues-and-limitations)).
+- The zod timeline schema and the Python model are checked against shared sample documents ([KI-7](../reference/status.md#known-issues-and-limitations), mitigated in P0; remaining gaps listed there); `estimate_duration` truncates long narration to 7 s ([KI-16](../reference/status.md#known-issues-and-limitations)).
 - No transitions, no audio mixing, no word-level subtitles; the scene's whole subtitle line is shown for the entire scene.
 - Sample render defaults are 1280×720 (the zod default is 1920×1080).
 - Remotion licensing for company use is the owner's responsibility.

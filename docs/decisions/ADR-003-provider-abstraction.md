@@ -30,7 +30,7 @@ Models, prices and availability change quickly. The owner has access to Ollama, 
 - The lowest-common-denominator interface hides provider-specific features (tool use, JSON mode, streaming). Add them to the interface only when a pipeline stage needs them.
 - Per-task *provider* routing (not just per-task model) is **Decision pending** ([model-routing](../ai/model-routing.md)).
 - Health endpoint reports configured/reachable without exposing keys ([provider-endpoints](../api/provider-endpoints.md)).
-- Failure isolation is incomplete: only `httpx.HTTPError` is wrapped in `ProviderError`; malformed responses escape unwrapped ([KI-3](../reference/status.md#known-issues-and-limitations)).
+- Failure isolation: every failure inside a provider call surfaces as a `ProviderError` subclass (`ProviderTimeoutError`, `ProviderResponseError`), verified by a shared mocked-HTTP contract suite (previously KI-3, resolved in P0). No workflow persists failure state or retries yet.
 - Provider calls are intended to be observable, timeout-controlled (120 s today), validated, retryable and replaceable; a provider failure must not corrupt project state.
 
 Architecture detail: [provider-architecture](../architecture/provider-architecture.md), [ai-architecture](../architecture/ai-architecture.md).

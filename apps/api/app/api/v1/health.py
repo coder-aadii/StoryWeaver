@@ -4,6 +4,7 @@ from fastapi import APIRouter, Response, status
 from sqlalchemy import text
 
 from app.core.config import get_settings
+from app.core.logging import get_logger
 from app.db.session import get_engine
 from app.intelligence.providers.ollama import OllamaProvider
 from app.intelligence.registry import llm_status
@@ -22,6 +23,7 @@ def health() -> dict[str, str]:
 def ready(response: Response) -> dict[str, Any]:
     """Readiness: database reachable and pgvector enabled."""
     checks: dict[str, Any] = {"database": False, "pgvector": False}
+    error: str | None = None
     try:
         with get_engine().connect() as conn:
             conn.execute(text("SELECT 1"))
@@ -30,12 +32,19 @@ def ready(response: Response) -> dict[str, Any]:
                 conn.execute(text("SELECT 1 FROM pg_extension WHERE extname='vector'")).first()
                 is not None
             )
-    except Exception:
-        pass
+    except Exception as exc:
+        # Type only in the response (no host/user leak); the sanitised message goes to the log.
+        error = type(exc).__name__
+        get_logger().warning(
+            "health.ready.failed", error=error, detail=str(exc)[:200], status="failed"
+        )
     ok = all(checks.values())
     if not ok:
         response.status_code = status.HTTP_503_SERVICE_UNAVAILABLE
-    return {"status": "ready" if ok else "not_ready", **checks}
+    body: dict[str, Any] = {"status": "ready" if ok else "not_ready", **checks}
+    if error:
+        body["error"] = error
+    return body
 
 
 @router.get("/providers")

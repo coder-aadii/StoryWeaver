@@ -109,7 +109,7 @@ Single user, single machine, no authentication, no background worker process (jo
 
 ## Known limitations referenced here
 
-Defects and gaps relevant to this component map are tracked once in [reference/status → Known issues](../reference/status.md#known-issues-and-limitations): unwired storage and runner ([KI-9](../reference/status.md#known-issues-and-limitations)), unmapped domain errors ([KI-8](../reference/status.md#known-issues-and-limitations)), the hand-maintained zod/Python timeline mirror ([KI-7](../reference/status.md#known-issues-and-limitations)), and no route to serve files from `data/` to the Player or renderer ([KI-17](../reference/status.md#known-issues-and-limitations)). The dev web server also binds beyond localhost ([KI-20](../reference/status.md#known-issues-and-limitations)).
+Defects and gaps relevant to this component map are tracked once in [reference/status → Known issues](../reference/status.md#known-issues-and-limitations): unwired storage and runner ([KI-9](../reference/status.md#known-issues-and-limitations)), residual gaps in the Python/zod timeline contract ([KI-7](../reference/status.md#known-issues-and-limitations)), and no route to serve files from `data/` to the Player or renderer ([KI-17](../reference/status.md#known-issues-and-limitations); render path decided in [ADR-009](../decisions/ADR-009-render-asset-resolution.md)). Domain errors are mapped to HTTP by `api/errors.py`, and both dev servers bind to `127.0.0.1`.
 
 ## Future evolution
 

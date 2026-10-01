@@ -16,8 +16,8 @@ Partially implemented (health endpoints and logs only).
 
 ## Planned — not implemented
 
-Job progress records, provider latency and token usage tables (logged token counts are currently masked as `***` by the key-name redaction, so token-usage observability from logs is not possible as designed — [KI-2](../reference/status.md#known-issues-and-limitations)), generation/render duration metrics, failure-rate views. The design intent is "simple structured logs + database records" rather than a metrics stack; Prometheus/Grafana/OpenTelemetry are **Deferred until required by the production workflow**.
+Job progress records, provider latency and token usage tables (`output_tokens` is logged as a number by `llm.generated`; nothing persists or aggregates it yet), generation/render duration metrics, failure-rate views. The design intent is "simple structured logs + database records" rather than a metrics stack; Prometheus/Grafana/OpenTelemetry are **Deferred until required by the production workflow**.
 
 ## Limitations
 
-Provider health checks run synchronously per request; no alerting; no uptime monitoring. `GET /health/ready` swallows the underlying exception and logs nothing when the database check fails, and the engine has no connect timeout, so a probe against an unreachable host may be slow or hang ([KI-5](../reference/status.md#known-issues-and-limitations)). Uvicorn access logs are plain text, separate from the JSON application log.
+Provider health checks run synchronously per request; no alerting; no uptime monitoring. `GET /health/ready` logs `health.ready.failed` on failure and the engine has a connect timeout (`DB_CONNECT_TIMEOUT_SECONDS`; previously KI-5). Uvicorn access logs are plain text, separate from the JSON application log.

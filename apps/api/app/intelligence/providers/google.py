@@ -1,4 +1,5 @@
 from app.core.config import get_settings
+from app.core.errors import ProviderResponseError
 from app.intelligence.providers.base import EmbeddingProvider, LLMProvider, http_client
 
 _BASE = "https://generativelanguage.googleapis.com/v1beta"
@@ -27,7 +28,18 @@ class GoogleProvider(LLMProvider, EmbeddingProvider):
             r = c.post(f"/models/{model}:generateContent", json=body)
             r.raise_for_status()
             d = r.json()
-        parts = d["candidates"][0]["content"]["parts"]
+        candidates = d.get("candidates") or []
+        parts = (candidates[0].get("content") or {}).get("parts") if candidates else None
+        if not parts:
+            # Blocked by safety filters, or a "thinking" model spent the whole token budget.
+            reason = (
+                candidates[0].get("finishReason")
+                if candidates
+                else (d.get("promptFeedback") or {}).get("blockReason")
+            )
+            raise ProviderResponseError(
+                f"google returned no content (reason: {reason or 'unknown'})"
+            )
         usage = d.get("usageMetadata") or {}
         return (
             "".join(p.get("text", "") for p in parts),
@@ -35,7 +47,7 @@ class GoogleProvider(LLMProvider, EmbeddingProvider):
             usage.get("candidatesTokenCount"),
         )
 
-    def embed(self, texts: list[str], *, model: str) -> list[list[float]]:
+    def _embed(self, texts: list[str], *, model: str) -> list[list[float]]:
         reqs = [{"model": f"models/{model}", "content": {"parts": [{"text": t}]}} for t in texts]
         with http_client(_BASE, self._headers()) as c:
             r = c.post(f"/models/{model}:batchEmbedContents", json={"requests": reqs})

@@ -53,7 +53,7 @@ Add a page under `src/app/…`, add a nav entry in `app-shell.tsx`, reuse `Resou
 - `/projects/[id]` stage cards are static "Not implemented yet" placeholders.
 - Remotion Player shows a license reminder; `acknowledgeRemotionLicense` is deliberately unset (owner's decision).
 - Fonts load from Google Fonts at build/dev time (needs network; [KI-25](../reference/status.md#known-issues-and-limitations)).
-- `NEXT_PUBLIC_API_URL` must be set in `apps/web/.env.local` (or the shell); the root `.env` does not reach the web app ([KI-21](../reference/status.md#known-issues-and-limitations)). The zod timeline mirror used by the Player is hand-maintained ([KI-7](../reference/status.md#known-issues-and-limitations)); nothing serves `data/` files to the Player ([KI-17](../reference/status.md#known-issues-and-limitations)).
+- `NEXT_PUBLIC_API_URL` must be set in `apps/web/.env.local` (or the shell); the root `.env` does not reach the web app ([KI-21](../reference/status.md#known-issues-and-limitations)). The zod timeline mirror used by the Player is hand-maintained but checked against shared sample documents ([KI-7](../reference/status.md#known-issues-and-limitations)); nothing serves `data/` files to the Player ([KI-17](../reference/status.md#known-issues-and-limitations)).
 
 ## Future evolution
 

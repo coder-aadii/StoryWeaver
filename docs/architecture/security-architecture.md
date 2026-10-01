@@ -16,7 +16,7 @@ State the trust assumptions and the controls that actually exist, so nobody mist
 | --- | --- | --- |
 | Secrets only in `.env` (git-ignored); `.env.example` contains no secrets or API keys (dev-only defaults) | `.gitignore`, `.env.example` | Keys read by the API only; `NEXT_PUBLIC_*` is the only browser-visible config |
 | Provider status without secrets | `/api/v1/health/providers` | Booleans only; covered by a test that a key does not appear in the response |
-| Log redaction by key name | `core/logging.py` | Keys containing `key/token/secret/password/authorization/credential` → `***`. Name-based: secrets embedded in message *values* are not detected |
+| Log redaction (keys + values) | `core/logging.py` | A key is masked (`***`) if its final word is a secret word (`api_key`, `password`, `authorization`, `token`/`access_token`, …); secret-shaped substrings (`sk-…`, `AIza…`, `Bearer …`, `user:password@` in URLs, …) are scrubbed in every string, including exception text. Best-effort, not a guarantee |
 | Path traversal protection | `LocalStorage.path_for` | Rejects absolute, NUL, `..` escapes (tests) |
 | Filename sanitising, streaming size cap | `sanitize_filename`, `LocalStorage.put` | No upload endpoint yet |
 | YouTube URL allow-list | `ingestion/youtube.py` `classify_youtube_url` | Scheme must be http(s); host must be in an exact allow-list; video id regex; length ≤ 2048 (tests include look-alike hosts and `file://`) |
@@ -52,8 +52,8 @@ Add auth as FastAPI dependencies on the router; add validators beside `classify_
 - CORS wildcard methods/headers; no CSRF concern only because there are no cookies/sessions.
 - yt-dlp fetches arbitrary-resolved media for allow-listed hosts only, but redirects/extractor behaviour inside yt-dlp are not audited.
 - Dev Postgres defaults (`storyweaver/storyweaver`) are for local use only.
-- Error types are not mapped to HTTP responses, so some failures would surface as 500 ([KI-8](../reference/status.md#known-issues-and-limitations)).
-- API-created `sources`/`channels` rows are not URL-validated ([KI-12](../reference/status.md#known-issues-and-limitations)); the Next.js dev server binds beyond localhost, so the UI is LAN-reachable ([KI-20](../reference/status.md#known-issues-and-limitations)); log redaction is by key name only ([KI-2](../reference/status.md#known-issues-and-limitations)); `TEST_DATABASE_URL` is destructive and unguarded ([KI-19](../reference/status.md#known-issues-and-limitations)).
+- Domain errors are mapped to HTTP responses with a stable `code`; unknown `StoryWeaverError`s return a generic 500 without details (previously KI-8, resolved in P0).
+- Known limitations: API-created `sources`/`channels` rows are URL-validated at creation (YouTube video / channel URLs only) but the update endpoints cannot change `url` and any future fetch must still re-validate (previously KI-12, resolved for create in P0); the web and API dev servers bind to `127.0.0.1` (previously KI-20, resolved in P0) — the API still has **no authentication**; log redaction is best-effort pattern matching; `TEST_DATABASE_URL` is destructive but now guarded by a `_test` name check (previously KI-19, resolved in P0).
 
 ## Future evolution
 

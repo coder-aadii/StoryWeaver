@@ -12,9 +12,9 @@ Images, audio and video are large; storing them in Postgres would bloat the data
 
 ## Decision
 
-- Files live under `data/` (configurable `STORAGE_ROOT`; note the empty `STORAGE_ROOT=` line in `.env.example` makes it resolve to `.` — [KI-1](../reference/status.md#known-issues-and-limitations)) in fixed buckets: `sources, transcripts, embeddings, images, audio, music, sfx, projects, renders, temporary`. Contents are git-ignored; `.gitkeep` files preserve the skeleton.
+- Files live under `data/` (configurable `STORAGE_ROOT`; an empty value means unset and resolves to `<repo>/data`) in fixed buckets: `sources, transcripts, embeddings, images, audio, music, sfx, projects, renders, temporary`. Contents are git-ignored; `.gitkeep` files preserve the skeleton.
 - Code addresses files by **storage key** (relative path), recorded in `assets.storage_key` with `mime_type`, `size_bytes` and a SHA-256 `checksum`.
-- The `Storage` protocol (`put/open/exists/delete`) isolates callers from the backend. `LocalStorage` resolves keys under the root and rejects absolute paths, `..` traversal, NUL bytes and escapes; `put` streams in 1 MiB chunks, enforces `max_upload_bytes` (raising a plain `ValueError`, not a typed error), writes to a `.part` file and renames atomically.
+- The `Storage` protocol (`put/open/exists/delete`) isolates callers from the backend. `LocalStorage` resolves keys under the root and rejects absolute paths, `..` traversal, NUL bytes and escapes; `put` streams in 1 MiB chunks, enforces `max_upload_bytes` (raising the typed `FileTooLargeError`, mapped to HTTP 413), writes to a `.part` file and renames atomically.
 - Intermediate media use filesystem files; large videos are never read fully into RAM.
 - MinIO/S3 will implement the same protocol (compose profile exists, unused). Migration path: copy files, keep keys.
 

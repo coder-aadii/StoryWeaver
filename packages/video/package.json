@@ -9,7 +9,9 @@
     "studio": "remotion studio src/entry.ts",
     "render": "remotion render src/entry.ts Basic out/sample.mp4 --props=./sample/timeline.json",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "fixture": "node scripts/make-fixture.mjs",
+    "spike:assets": "node scripts/spike-assets.mjs"
   },
   "dependencies": {
     "@remotion/cli": "^4.0.530",
@@ -17,7 +19,7 @@
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "remotion": "^4.0.530",
-    "zod": "^4.6.5"
+    "zod": "4.5.4"
   },
   "devDependencies": {
     "@types/node": "^20.19.43",

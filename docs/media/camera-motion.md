@@ -8,7 +8,7 @@
 
 ## Current implementation
 
-Schema: `CameraSpec {shot, movement}` with `shot ∈ wide, medium, close_up, extreme_close_up, over_shoulder, aerial` and `movement ∈ static, slow_zoom_in, slow_zoom_out, pan_left, pan_right, tilt_up, tilt_down` ([`schemas/scene.py`](../../apps/api/app/schemas/scene.py)). The zod mirror types `shot` as a free string (Python restricts it to the set above) and `movement` as the enum ([KI-7](../reference/status.md#known-issues-and-limitations)).
+Schema: `CameraSpec {shot, movement}` with `shot ∈ wide, medium, close_up, extreme_close_up, over_shoulder, aerial` and `movement ∈ static, slow_zoom_in, slow_zoom_out, pan_left, pan_right, tilt_up, tilt_down` ([`schemas/scene.py`](../../apps/api/app/schemas/scene.py)). The zod mirror uses the same `shot` and `movement` enums (a Python test compares the literals; previously `shot` was a free string — KI-7, mitigated in P0).
 
 Implementation: pure function `cameraTransform(movement, t)` in [`camera.ts`](../../packages/video/src/camera.ts), `t` = scene progress clamped to [0,1], **linear** (no easing):
 

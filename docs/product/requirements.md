@@ -14,7 +14,7 @@ State legend: **Implemented** · **Partial** · **Planned** (not implemented) ·
 
 | ID | Requirement | State | Notes |
 | --- | --- | --- | --- |
-| FR-S1 | Accept a YouTube video URL and validate it | Partial | `classify_youtube_url` validates, but it is applied only inside the extractor: `POST /sources` and `POST /channels` accept any URL string ([KI-12](../reference/status.md#known-issues-and-limitations)). Extraction needs optional yt-dlp, never run live, and returns metadata only ([KI-15](../reference/status.md#known-issues-and-limitations)) |
+| FR-S1 | Accept a YouTube video URL and validate it | Partial | `POST /sources` and `POST /channels` validate the URL on create (YouTube video / channel URL; other platforms need `http(s)`; previously KI-12), and the extractor validates independently. Extraction needs optional yt-dlp, never run live, and returns metadata only ([KI-15](../reference/status.md#known-issues-and-limitations)) |
 | FR-S2 | Scan a channel/playlist and report video count before import | Partial | `list_videos` exists in the extractor; scan/confirm flow is Planned |
 | FR-S3 | Import N of M videos via a workflow | Planned | See [channel-ingestion](../domains/channel-ingestion.md) |
 | FR-S4 | Store metadata and transcripts with timestamps | Partial | `Transcript` holds a single `text` plus `segments` JSONB; tables exist, ingestion workflow Planned. A raw-vs-cleaned split and where the raw file lives are **Decision pending**; transcript versioning is a Target ([KI-13](../reference/status.md#known-issues-and-limitations)). Uploaded transcripts without a remote origin are not currently representable ([KI-14](../reference/status.md#known-issues-and-limitations)) |
@@ -74,8 +74,8 @@ State legend: **Implemented** · **Partial** · **Planned** (not implemented) ·
 | FR-P2 | Health, readiness, provider status | Implemented |
 | FR-P3 | Background workflows with persisted status/errors | Partial (`LocalRunner` only; no persisted workflow table; no route or service uses it — [KI-9](../reference/status.md#known-issues-and-limitations)) |
 | FR-P7 | Model routing: different tasks use different models/providers (routine → cheap/local; analysis, story, script → stronger), considering quality, latency, cost, context window, structured-output support, availability, reliability | Planned — only per-task model *settings* exist; per-task provider routing is Decision pending ([model-routing](../ai/model-routing.md)) |
-| FR-P8 | Cost tracking: record tokens, duration and cost per provider call | Planned — token counts are currently masked in logs ([KI-2](../reference/status.md#known-issues-and-limitations)); no storage exists ([ai-cost-strategy](../ai/ai-cost-strategy.md)) |
-| FR-P9 | Provider failure isolation: a failed provider call must not corrupt project state; calls are timeout-controlled, validated, retryable where appropriate and replaceable | Partial — status/error columns and 120 s HTTP timeout exist; only `httpx.HTTPError` is wrapped, malformed responses escape ([KI-3](../reference/status.md#known-issues-and-limitations)) |
+| FR-P8 | Cost tracking: record tokens, duration and cost per provider call | Planned — token counts are logged (not masked) but nothing persists them; no storage exists ([ai-cost-strategy](../ai/ai-cost-strategy.md)) |
+| FR-P9 | Provider failure isolation: a failed provider call must not corrupt project state; calls are timeout-controlled, validated, retryable where appropriate and replaceable | Partial — status/error columns exist and provider failures surface as typed `ProviderError`s with a configurable timeout (`LLM_TIMEOUT_SECONDS`); no workflow persists failure state or retries yet |
 | FR-P4 | Durable workflows (Temporal) | Future ([workflow-architecture](../architecture/workflow-architecture.md)) |
 | FR-P5 | Object storage (S3/MinIO) | Future ([storage-architecture](../architecture/storage-architecture.md)) |
 | FR-P6 | Authentication / multi-user | Future |
@@ -87,7 +87,7 @@ State legend: **Implemented** · **Partial** · **Planned** (not implemented) ·
 | NFR-1 | Boot with zero optional providers configured | Implemented |
 | NFR-2 | No model loaded or connection opened at import/startup | Implemented (lazy engine, lazy registry) |
 | NFR-3 | Runs on ~16 GB RAM, no GPU | Implemented for foundation; unmeasured for AI/media workloads |
-| NFR-4 | Provider keys server-side only and not logged | Partial — keys are read server-side and sent in headers; log redaction is by key *name* only (substring match, which also masks `output_tokens`), and exception text is not scrubbed ([KI-2](../reference/status.md#known-issues-and-limitations)) |
+| NFR-4 | Provider keys server-side only and not logged | Partial — keys are read server-side and sent in headers; log redaction masks secret-named keys and scrubs secret-shaped values (including exception text) but is best-effort pattern matching |
 | NFR-5 | Path traversal protection, upload size cap, streaming IO | Implemented in `LocalStorage` (tested); no route uses it and there is no upload endpoint ([KI-9](../reference/status.md#known-issues-and-limitations)) |
 | NFR-6 | Idempotent, retryable operations | Planned (design intent; no operations yet) |
 | NFR-7 | Structured logging with workflow/project/scene context | Partial (logging configured; few call sites) |

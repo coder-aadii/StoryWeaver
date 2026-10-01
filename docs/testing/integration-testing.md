@@ -8,14 +8,14 @@ Implemented.
 
 ## Fixture design (`apps/api/tests/conftest.py`)
 
-- Session-scoped `engine`: skips unless `TEST_DATABASE_URL` is set and reachable; sets `DATABASE_URL` to it, clears the settings cache, then runs `alembic downgrade base` + `upgrade head` — so every run validates the migrations from scratch. **It destroys data in that database, and nothing verifies the URL points at a throwaway database** ([KI-19](../reference/status.md#known-issues-and-limitations)).
-- Isolation caveat ([KI-11](../reference/status.md#known-issues-and-limitations)): the fixture clears the *settings* cache but not the cached `get_engine()`/`get_sessionmaker()`. `test_ready_with_database` (which uses the app's own engine) passes only because nothing builds that engine earlier in the session, so test ordering or an earlier DB-touching import can break it.
+- Session-scoped `engine`: skips unless `TEST_DATABASE_URL` is set and reachable; **first checks it is safe to wipe** (`tests/db_safety.py`: the database name must end in `_test` — override with `STORYWEAVER_ALLOW_DESTRUCTIVE_TESTS=1` — and it must not be the application's `DATABASE_URL`; this runs before any DDL, previously KI-19). It then resets the cached settings/engine/sessionmaker, runs `alembic downgrade base` + `upgrade head` — so every run validates the migrations from scratch. **It still destroys all data in that database**, so use a disposable one.
+- Isolation: `conftest.py` overrides `DATABASE_URL` and provider keys in the environment for the whole session (so a DB-less test can never reach a real database or provider) and resets the cached settings, engine and sessionmaker around the DB fixtures; results are order-independent (previously KI-11, resolved in P0). `tests/test_migrations.py` checks up → down → up and `alembic check`.
 - `db`: a Session; after each test, `TRUNCATE ... CASCADE` on all tables except `alembic_version`.
 - `client`: `TestClient` with `get_db` overridden to the test session.
 
-## Covered (`test_models.py`)
+## Covered (`test_models.py`, `test_migrations.py`, and the DB-backed cases in `test_api.py`, `test_api_hardening.py`, `test_health.py`)
 
-Defaults and timestamps; one `SourceVideo` shared by two projects (join table); unique `(scene_id, version)` on `scene_versions`; embedding round trip and nearest neighbour via `cosine_distance`. Also `/health/ready` against the real DB.
+Migrations up → down → up and `alembic check` (`test_migrations.py`); API round trips, 404/409 bodies with `code`, valid PATCH and clearing nullable fields. Models: defaults and timestamps; one `SourceVideo` shared by two projects (join table); unique `(scene_id, version)` on `scene_versions`; embedding round trip and nearest neighbour via `cosine_distance`. Also `/health/ready` against the real DB.
 
 ## Running
 

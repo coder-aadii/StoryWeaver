@@ -9,7 +9,7 @@ Partially implemented. Primitives exist; **no upload or download endpoint exists
 ## Implemented primitives
 
 - `sanitize_filename`: strips directories (both separators), leading dots/spaces, replaces anything outside `[A-Za-z0-9._-]`, truncates to 200 chars, rejects empty results.
-- `LocalStorage.put`: streamed, sha256 computed while writing, hard stop above `MAX_UPLOAD_BYTES` (default 512 MiB), written to `.part` then atomically renamed, `.part` removed on failure. Over the cap it raises a plain `ValueError` (not a typed `StoryWeaverError`), so **any endpoint that uses it must catch it and return HTTP 413**; typed errors are not mapped to HTTP statuses either ([KI-8](../reference/status.md#known-issues-and-limitations), [KI-9](../reference/status.md#known-issues-and-limitations)).
+- `LocalStorage.put`: streamed, sha256 computed while writing, hard stop above `MAX_UPLOAD_BYTES` (default 512 MiB), written to `.part` then atomically renamed, `.part` removed on failure. Over the cap it raises the typed `FileTooLargeError` (a `StoryWeaverError` and a `ValueError`), which the API maps to HTTP 413 `file_too_large` (previously a plain `ValueError`; resolved in P0). No endpoint uses `put` yet ([KI-9](../reference/status.md#known-issues-and-limitations)).
 - `assets` rows carry `mime_type`, `size_bytes`, `checksum`, `status`, `error`.
 
 No route uses `LocalStorage` and no endpoint serves files from `data/` today ([KI-9](../reference/status.md#known-issues-and-limitations)).

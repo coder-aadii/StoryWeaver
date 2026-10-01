@@ -58,6 +58,6 @@ The authoritative list is [Known issues and limitations](../reference/status.md#
 
 - `metadata` is reserved by SQLAlchemy; the Python attribute is `meta` (column `metadata`).
 - Changing the embedding dimension needs a migration; the setting alone does nothing ([KI-6](../reference/status.md#known-issues-and-limitations)).
-- `make test` can report green with database tests skipped, and `TEST_DATABASE_URL` is destructive ([KI-19](../reference/status.md#known-issues-and-limitations)).
-- An empty `STORAGE_ROOT=` in `.env` resolves to the working directory ([KI-1](../reference/status.md#known-issues-and-limitations)).
+- `make test` can report green with database tests skipped, and `TEST_DATABASE_URL` is destructive (guarded: the database name must end in `_test` and differ from `DATABASE_URL`).
+- Settings given as empty strings in `.env` mean "unset" only where a validator says so (`STORAGE_ROOT` does; most string settings treat empty as "not configured"). Next.js reads its env from `apps/web/`, not the root `.env` ([operations/environment-variables](../operations/environment-variables.md)).
 - Docker Compose has never been run on the original development machine; the Docker-free helper has.

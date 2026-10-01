@@ -17,7 +17,7 @@ Health tests: [unit testing](unit-testing.md), [integration testing](integration
 
 ## Not covered
 
-Per-resource create/patch for channels, transcripts, topics (slug pattern), collections, scripts, assets, renders; pagination bounds (`limit` 1–200, `offset` ≥ 0 → 422 outside); unknown-field rejection on PATCH (`extra="forbid"`), explicit `null` on PATCH (clears nullable columns; on NOT NULL columns it yields a misleading 409) and over-long values on update schemas (500) — see [KI-4](../reference/status.md#known-issues-and-limitations). The generic factory means one well-tested path protects most routes, but resource-specific validators (e.g. topic slug regex) deserve cases.
+Per-resource create/patch for channels, transcripts, topics (slug pattern), collections, scripts, assets, renders; pagination bounds (`limit` 1–200, `offset` ≥ 0 → 422 outside); unknown-field rejection on PATCH (`extra="forbid"`), explicit `null` on PATCH (clears nullable columns, 422 on NOT NULL fields), over-long values on update schemas (422), URL validation on source/channel create, the `{detail, code}` error bodies and the domain-error → HTTP mapping (`tests/test_api_hardening.py`; previously KI-4/KI-8/KI-12). The generic factory means one well-tested path protects most routes, but resource-specific validators (e.g. topic slug regex) deserve cases.
 
 ## Approach
 

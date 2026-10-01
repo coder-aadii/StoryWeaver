@@ -17,7 +17,7 @@ Implemented. Source of truth: the root [`Makefile`](../../Makefile) and each pac
 | `make db-migrate` | `alembic upgrade head` |
 | `make db-revision m="msg"` | Autogenerate a migration (review it; see [migrations](../development/migrations.md)) |
 | `make dev` / `dev-api` / `dev-web` | API on :8000 (reload), web on :3100, or both |
-| `make test` / `test-api` / `test-web` | pytest; Vitest for web and video (`test-web` runs both). DB tests skip without `TEST_DATABASE_URL`, which is **destructive** — it must point at a disposable database ([KI-19](status.md#known-issues-and-limitations)) |
+| `make test` / `test-api` / `test-web` | pytest; Vitest for web and video (`test-web` runs both). DB tests skip without `TEST_DATABASE_URL`, which is **destructive** — it must point at a disposable database; it is refused unless the database name ends in `_test` and differs from `DATABASE_URL` (previously KI-19) |
 | `make e2e` | Playwright (needs the dev stack; see [e2e testing](../testing/e2e-testing.md)) |
 | `make lint` | ruff check + format check + pyright; ESLint + tsc (web); tsc (video) |
 | `make format` | ruff format/fix; Prettier (web) |
