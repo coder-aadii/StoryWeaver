@@ -1,38 +1,98 @@
-# Data flow
+# Data Flow
 
-## Target pipeline (planned unless marked)
+> How data moves through StoryWeaver, from a source to a final MP4, and which hops exist today.
 
-```text
-Source (URL/transcript/file)
-  → SourceExtractor → NormalizedSource            [interface + YouTube URL validation]
-  → Transcript → chunks → embeddings → pgvector   [tables + chunking; embedding workflow planned]
-  → analysis → story arcs → script (versions)     [planned]
-  → SceneSpec[] (storyboard)                      [schema implemented]
-  → characters / locations / visual bible         [tables; generation planned]
-  → images (ImageGenerator) + voice (VoiceProvider) → Assets   [interfaces]
-  → build_timeline(SceneSpec[]) → Timeline JSON   [implemented]
-  → Remotion composition → MP4                    [implemented for the sample]
-  → QA                                            [planned]
+## Status
+
+**Partially implemented.** The timeline → Remotion → MP4 hop works for a sample; the upstream hops are interfaces, tables or **Planned — not implemented**.
+
+## Purpose
+
+Be the single place that maps every pipeline stage to its data, owner module and implementation state. Stage-level detail lives in [domains/](../domains/) and [workflows/](../workflows/).
+
+## Current implementation
+
+Only these flows run today:
+
+1. **CRUD**: browser → `/api/v1/<resource>` → Postgres (10 resource groups).
+2. **Health**: `/health`, `/health/ready` (DB + pgvector), `/health/providers`.
+3. **Timeline build**: `video.timeline.build_timeline(list[SceneSpec]) → Timeline` (pure function, unit-tested).
+4. **Render of the sample**: `packages/video/sample/timeline.json` → Remotion `Basic` composition → `out/sample.mp4` (`make render-sample`); live preview in `/studio`.
+
+## Target architecture
+
+```mermaid
+flowchart TD
+  S[Source<br/>URL · transcript · file] -->|SourceExtractor| N[NormalizedSource]
+  N --> T[Transcript + segments]
+  T --> C[Chunks + embeddings<br/>pgvector]
+  C --> A[Source understanding<br/>facts · themes · angles]
+  A --> SC[Story candidates]
+  SC --> ARC[Story architecture]
+  ARC --> SCR[Script version]
+  SCR --> SB[Storyboard<br/>SceneSpec list]
+  SB --> BIB[Character + visual bible]
+  BIB --> IMG[Images]
+  SB --> VO[Voice audio]
+  IMG --> AS[(Assets<br/>data/ + DB rows)]
+  VO --> AS
+  AS --> TL[Timeline JSON<br/>build_timeline]
+  VO -->|measured duration| TL
+  TL --> R[Remotion renderer<br/>FFmpeg role: Decision pending]
+  R --> MP4[MP4 render asset]
+  MP4 --> QA[Automated QA]
 ```
+
+### Stage status
+
+| Stage | Owner module | Persists to | State |
+| --- | --- | --- | --- |
+| Source → `NormalizedSource` | `ingestion` | `source_videos`, `channels` | Interface + YouTube URL validation + optional yt-dlp extractor (not run live); persistence workflow Planned |
+| Transcript | `ingestion` | `transcripts` (single `text` + `segments` JSONB; raw-vs-cleaned and raw file location **Decision pending**) | Table + transcriber interface; `extract()` returns metadata only ([KI-15](../reference/status.md#known-issues-and-limitations)); workflow Planned |
+| Chunks / embeddings | `ingestion`, `intelligence` | `transcript_chunks.embedding vector(768)` | Chunker + table + HNSW index + NN test implemented; embedding generation Planned |
+| Understanding → story → script | `story`, `intelligence` | `scripts`, `script_versions` | Tables only; **Planned — not implemented** |
+| Storyboard | `story` | `scenes`, `scene_versions.data` | `SceneSpec` schema + tables; generation Planned |
+| Bibles | `story`/`visual` | `characters`, `locations` | Tables only; no endpoints; `CharacterVersion` deferred |
+| Images | `visual` | `assets` + `data/images` | Interface; mock only; ComfyUI stub |
+| Voice | `voice` | `assets` + `data/audio` | Interface; no working provider |
+| Timeline | `video` | `renders.timeline` snapshot | `build_timeline` implemented; not yet called by any workflow |
+| Render | `packages/video` | `assets` (type `render`), `renders` | CLI on sample only; render workflow Planned |
+| QA | `quality` | Planned — Decision pending | **Planned — not implemented** |
+
+### Source pipeline naming
+
+The provider-independent chain (`Source → Source Provider → Normalized Source → Transcript → Chunks → Intelligence → Search/Knowledge`) is defined canonically in [domains/source-library](../domains/source-library.md). In this document: "Source Provider" is a `SourceExtractor` implementation (YouTube is the only one). A source record's `status=imported` means *metadata stored*; "searchable" is derived from a `ready` transcript plus chunks/embeddings, not from that status.
+
+### Artifact versioning and invalidation (Target Architecture — Decision pending)
+
+Semantics (stale vs. preserve, the dependency graph): [workflows/workflow-overview](../workflows/workflow-overview.md). Data direction (columns vs. join table): [data/asset-data-model](../data/asset-data-model.md#artifact-versions-and-dependencies-target). Today only `script_versions` and `scene_versions` exist, with no dependency links and no invalidation logic; caching of metadata, transcripts, chunks, embeddings, analysis, story candidates and visual descriptions is **Planned — not implemented**.
+
+## Components
+
+[system-architecture](system-architecture.md) · [media-pipeline](media-pipeline.md) · [workflow-architecture](workflow-architecture.md).
+
+## Responsibilities
+
+AI-owned transformations (understanding, story, script, storyboard text, prompts) vs. code-owned transformations (chunking, timing, asset naming/hashing, rendering, validation): [ai-architecture](ai-architecture.md), [ADR-004](../decisions/ADR-004-ai-vs-deterministic-responsibilities.md).
 
 ## The timeline contract
 
-`app.schemas.scene.Timeline` (Python, source of truth) ⇄ `packages/video/src/types.ts` (zod mirror) ⇄
-`packages/schemas/timeline.schema.json` (generated). Scenes carry `start`, `duration`, `subtitle`, optional
-`image_src`/`audio_src`, and `camera.movement`. Durations come from code: measured audio length when
-available, otherwise `estimate_duration` (clamped 2–7 s as a *default*, not a rule).
+`app.schemas.scene.Timeline` (Python, source of truth) ⇄ `packages/video/src/types.ts` (zod mirror, hand-maintained) ⇄ `packages/schemas/timeline.schema.json` (generated by `make schemas`). The mirror is not checked automatically against the Python model and already differs in two places ([KI-7](../reference/status.md#known-issues-and-limitations)) — keep them in sync manually. Specification: [media/timeline-specification](../media/timeline-specification.md).
 
-Render today: `pnpm --filter @storyweaver/video render` reads `sample/timeline.json` → `out/sample.mp4`.
-Live preview: `/studio` embeds the Remotion Player with the same JSON.
+Durations come from code, never from the LLM. Target: measured audio length when known. Today: `SceneSpec.duration` if set, otherwise `estimate_duration` (≈2.5 words/s, clamped to 2–7 s as a *default*, not a rule — the clamp truncates long narration to 7 s, [KI-16](../reference/status.md#known-issues-and-limitations); see [domains/timeline-system](../domains/timeline-system.md)). Nothing measures audio yet.
 
-## Retry and idempotency (design intent)
+## Failure modes
 
-Operations are keyed by entity id (`import_video(video_id)`, `generate_scene_image(scene_id)`,
-`render_project(project_id)`): they read current state, skip finished work, and write `status` + `error`
-on the entity. `LocalRunner` logs `workflow_id`/status and never lets a failed job crash the app. None of these
-operations exist yet.
+A stage failure is recorded on its entity (`status=failed`, `error` text) and must not cascade; downstream stages simply have nothing to consume until retried. Retry design: [workflows/retry-and-recovery](../workflows/retry-and-recovery.md). **Intent only** — no stage workflow exists yet.
 
-## Semantic search (planned)
+## Extension points
 
-`transcript_chunks.embedding` + HNSW cosine index are in place and covered by a nearest-neighbour test.
-`chunk_segments` produces timed chunks. Embedding generation and RAG endpoints are not built.
+Add a stage by adding a module under `apps/api/app/`, tables/migration if needed, and a workflow function submitted through `WorkflowRunner` ([development/adding-a-domain](../development/adding-a-domain.md)).
+
+## Current limitations
+
+No stage is connected to another by code; the hops in the diagram are the design, not a running pipeline.
+
+## Future evolution
+
+Semantic search/RAG over chunks ([ai/rag-strategy](../ai/rag-strategy.md)); regeneration of single scenes using `SceneVersion` and per-asset status ([domains/storyboard-system](../domains/storyboard-system.md)).

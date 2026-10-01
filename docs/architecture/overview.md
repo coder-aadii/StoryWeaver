@@ -1,44 +1,98 @@
-# Architecture overview
+# Architecture Overview
 
-StoryWeaver is a **modular monolith**: one FastAPI application, one PostgreSQL database, one Next.js UI.
-Domain modules live under `apps/api/app/` and talk through plain Python interfaces.
+> Entry point for StoryWeaver's architecture: what the system is, how it is divided, and where each concern is documented in depth.
 
-## Modules
+## Status
 
-| Module | Responsibility | State |
+**Partially implemented.** The foundation (API, database schema, provider interfaces, app shell, one Remotion composition) exists. Most of the production pipeline is **Planned — not implemented**. The canonical per-subsystem matrix is [reference/status](../reference/status.md).
+
+## Purpose
+
+StoryWeaver is a local-first, AI-assisted story-to-video engine ("From source to story to video"). The architecture exists to keep three things true as the product grows:
+
+1. **AI decides content; deterministic code decides timing, asset management and rendering** ([ADR-004](../decisions/ADR-004-ai-vs-deterministic-responsibilities.md)).
+2. **No business logic depends on one AI provider** ([ADR-003](../decisions/ADR-003-provider-abstraction.md)).
+3. **Any scene or asset can be regenerated without rebuilding the project** (independent identity, status and version per scene/asset).
+
+## Guiding principles
+
+**AI decides CONTENT** — source understanding, topic extraction, story-opportunity discovery, story architecture, script, scene intent, visual descriptions, emotional beats, visual prompts, creative choices.
+**Deterministic software decides EXECUTION** — validation, schemas, persistence, IDs, asset relationships, timestamps, durations, subtitle timing, audio sync, timeline construction, rendering, encoding, retries, file management, reproducibility.
+
+**Optimisation goal: maximum content quality at minimum monetary cost** — not minimum cost at any cost. The system is *local-first, not local-only*: routine work runs on local models, high-value creative work may use stronger (cloud) models, and dedicated providers serve embeddings, images, TTS and STT. See [ai-architecture](ai-architecture.md) and [ai/ai-cost-strategy](../ai/ai-cost-strategy.md). Per-task routing is **Planned — not implemented**; only per-task model *settings* exist.
+
+**Staged pipeline with approval gates (Target Architecture).** Expensive generation happens only after the user approves the creative direction; the canonical description and rationale are in [ai/ai-cost-strategy](../ai/ai-cost-strategy.md). Nothing in this chain is automated yet.
+
+**Four concepts must not be conflated** — scene intent, image prompt, generated asset, timeline shot. The canonical definition and the identifier mapping live in [domains/storyboard-system](../domains/storyboard-system.md); this overview does not repeat the table. Terminology note: in code today `CameraSpec.shot` means the *framing type* (`wide`, `close_up`, …) and there is **no Shot entity**; the "timeline shot" used above is a future concept (*Decision pending*) — see [reference/glossary](../reference/glossary.md).
+
+## Current implementation
+
+A **modular monolith** ([ADR-006](../decisions/ADR-006-modular-monolith.md)): one FastAPI application, one PostgreSQL database (with pgvector), one Next.js UI, and one Remotion package.
+
+| Module (`apps/api/app/…`) | Responsibility | State |
 | --- | --- | --- |
-| `ingestion` | `SourceExtractor` → `NormalizedSource`; YouTube URL validation + yt-dlp; transcription interface; transcript chunking | URL validation, chunking implemented; extraction/transcription need optional extras and are untested against real services |
-| `intelligence` | `LLMProvider.generate/generate_structured`, `EmbeddingProvider.embed`, lazy registry | Adapters for Ollama, Google, OpenRouter, Grok, Claude-compatible |
-| `story` | Story architecture (hook→resolution) | Placeholder |
-| `visual` | `ImageGenerator` (ComfyUI stub, mock) | Interface |
-| `voice` | `VoiceProvider` | Interface; fails loudly when unconfigured |
-| `video` | Deterministic timeline builder | Implemented |
-| `quality` | Automated QA | Placeholder |
-| `workflows` | `WorkflowRunner`; `LocalRunner` in-process | Temporal adapter later |
-| `core` | Settings, structured logging (key-name redaction), local storage with traversal protection | Implemented |
+| `core/` | Settings, structured logging with key-name redaction, local storage with path-traversal protection, error types | Implemented |
+| `db/`, `models/` | Lazy sync SQLAlchemy engine/session; 17 tables; status enums | Implemented |
+| `schemas/` | Pydantic API models (`resources.py`), scene/timeline contract (`scene.py`), `NormalizedSource` (`source.py`) | Implemented |
+| `api/` | `/api/v1` router; generic CRUD factory; health endpoints | Implemented |
+| `ingestion/` | `SourceExtractor` interface, YouTube URL classification + optional yt-dlp extractor, `Transcriber` interface + lazy faster-whisper, transcript chunking | Partially implemented (extractor/transcriber never run against real services) |
+| `intelligence/` | `LLMProvider`/`EmbeddingProvider` interfaces, five LLM adapters, two embedding adapters, lazy registry | Partially implemented (only Ollama's chat request shape is test-covered; embedding adapters are untested) |
+| `visual/` | `ImageGenerator` interface, mock generator, ComfyUI **stub** | Partially implemented |
+| `voice/` | `VoiceProvider` interface; default provider always raises "not configured" | Partially implemented |
+| `video/` | Deterministic `build_timeline` | Implemented |
+| `workflows/` | `WorkflowRunner` protocol + in-process `LocalRunner` | Partially implemented (runner exists and is unit-testable; no workflow function exists and no route calls it) |
+| `story/`, `quality/` | Docstring-only packages | Planned — not implemented |
 
-## Rules the code follows
+Outside the API: `apps/web` (Next.js app shell), `packages/video` (Remotion `Basic` composition + sample timeline), `packages/schemas` (generated JSON Schema), `data/` (local file storage skeleton).
 
-- **Lazy everything.** Importing the app opens no connection and loads no model; providers are created on use.
-- **Optional providers.** Missing keys make a provider "not configured", never crash startup.
-- **AI vs. code.** LLMs produce `SceneSpec` content; `video.timeline` assigns durations/start times; Remotion/FFmpeg render.
-- **Granular identity.** `Scene`, `SceneVersion`, `Asset`, `Render` have their own ids and statuses, with `error` persisted so a failure is retryable without touching the rest of the project.
-- **Versioned content.** `ScriptVersion`, `SceneVersion` (unique `(parent, version)`), with `prompt_version`/`provider`/`model` recorded on scripts.
-- **Binary data is not in Postgres.** `Asset.storage_key` points into `data/` (S3/MinIO later behind the same `Storage` protocol).
-- **Shared sources.** `SourceVideo` is unique per `(platform, external_id)`; `ProjectSource` and `CollectionVideo` are join tables.
+## Target architecture
 
-## Database
+The same monolith, with the planned domain modules filled in and a durable workflow backend (Temporal) available as an alternative to `LocalRunner`. Splitting a module into its own process (for example a GPU image worker) is allowed only when it needs independent scaling or a different runtime — **Decision pending**, see [scalability](scalability.md).
 
-17 tables: `channels, source_videos, transcripts, transcript_chunks (vector(768), HNSW cosine index), topics,
-collections, collection_videos, projects, project_sources, scripts, script_versions, scenes, scene_versions,
-characters, locations, assets, renders`. Enums are stored as VARCHAR (not native PG enums) so adding a status
-needs no `ALTER TYPE`. The embedding dimension (768) is fixed in the schema; changing embedding models to a
-different size requires a migration.
+```mermaid
+flowchart LR
+  UI[Next.js UI] -->|HTTP /api/v1| API[FastAPI modular monolith]
+  API --> DB[(PostgreSQL + pgvector)]
+  API --> FS[(data/ local files)]
+  API -.optional.-> LLM[LLM / embedding providers]
+  API -.optional.-> IMG[Image / voice providers]
+  API -.planned.-> RND[Remotion + FFmpeg renderer]
+```
 
-Not yet modelled: `CharacterVersion`, visual style/era entities, tags — add when a consumer exists.
+The full diagram is in [system-architecture](system-architecture.md).
 
-## Security posture (local-first, no auth yet)
+## Components and responsibilities
 
-URL allow-listing for YouTube, storage keys sanitised and resolved under the storage root, streaming uploads with a
-size cap, parameterised SQL via SQLAlchemy, no shell invocation of user input, keys server-side only, CORS limited
-to configured origins. There is **no authentication**: do not expose the API beyond localhost.
+See [system-architecture](system-architecture.md) (component map), [backend-architecture](backend-architecture.md), [frontend-architecture](frontend-architecture.md), [domain-architecture](domain-architecture.md), [provider-architecture](provider-architecture.md), [media-pipeline](media-pipeline.md).
+
+## Architectural rules the code follows today
+
+- **Lazy everything.** Importing the app opens no database connection and loads no model; engines and providers are created on first use (`db/session.py`, `intelligence/registry.py`).
+- **Optional providers.** A missing key makes a provider "not configured"; it never prevents startup (no provider credential is required; `Settings` still has non-empty defaults for the database URL, Ollama URL and CORS origins — see [reference/environment-reference](../reference/environment-reference.md)).
+- **Structured data over text.** Scene, timeline and source contracts are Pydantic models; free-form JSON is confined to `JSONB` columns.
+- **Granular identity.** `Scene`, `SceneVersion`, `Asset` and `Render` have their own ids and statuses; `error` is persisted on the entity.
+- **Binary data is not in Postgres.** `Asset.storage_key` is designed to point into `data/` (see [storage-architecture](storage-architecture.md)).
+
+## Data flow
+
+End-to-end target pipeline and what is implemented: [data-flow](data-flow.md).
+
+## Failure modes
+
+Per-subsystem failure modes live in each architecture document. Cross-cutting policy: a failure is recorded on the failing entity (`status`, `error`) and must not fail the project — see [workflow-architecture](workflow-architecture.md) and [workflows/retry-and-recovery](../workflows/retry-and-recovery.md).
+
+## Extension points
+
+New LLM provider ([development/adding-a-provider](../development/adding-a-provider.md)); new domain module ([development/adding-a-domain](../development/adding-a-domain.md)); new API resource ([development/adding-an-api-resource](../development/adding-an-api-resource.md)); new Remotion composition ([development/adding-a-remotion-composition](../development/adding-a-remotion-composition.md)).
+
+## Current limitations
+
+- No authentication — localhost only ([security-architecture](security-architecture.md)).
+- No workflow is implemented end to end; the API has CRUD only.
+- No real image or voice generation; no render workflow (rendering today is a manual CLI command on a sample timeline).
+- Provider adapters have not been exercised against real services; only Ollama's chat request has an (HTTP-mocked) test; embedding adapters and the other LLM adapters have none.
+- Further code-level limitations are tracked once in [reference/status → Known issues](../reference/status.md#known-issues-and-limitations) (for example unwired `LocalStorage`/`LocalRunner` [KI-9](../reference/status.md#known-issues-and-limitations), unmapped domain errors [KI-8](../reference/status.md#known-issues-and-limitations), timeline contract drift [KI-7](../reference/status.md#known-issues-and-limitations), no asset serving [KI-17](../reference/status.md#known-issues-and-limitations)).
+
+## Future evolution
+
+Pipeline implementation order is in [product/feature-roadmap](../product/feature-roadmap.md). Rationale for the stack: [ADR-001](../decisions/ADR-001-stack.md).
